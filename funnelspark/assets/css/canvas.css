@@ -1,0 +1,211 @@
+/* ============================================================
+   FunnelSpark Canvas Editor Styles
+   ============================================================ */
+
+/* ── Editor Full-Screen Layout ───────────────────────────────── */
+html, body.fs-editor-body {
+  margin: 0; padding: 0; height: 100%; overflow: hidden;
+  background: var(--fs-teal); color: var(--fs-white);
+  font-family: var(--fs-font-b);
+}
+
+.fs-editor-body #wpcontent,
+.fs-editor-body #wpbody,
+.fs-editor-body #wpbody-content { padding: 0 !important; margin: 0 !important; }
+.fs-editor-body #adminmenuwrap { display: none; }
+
+/* ── Top Bar ─────────────────────────────────────────────────── */
+.fs-editor-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px; background: #030f13; border-bottom: 1px solid var(--fs-border);
+  padding: 0 16px; gap: 12px; flex-shrink: 0; position: relative; z-index: 100;
+}
+.fs-editor-topbar__left,
+.fs-editor-topbar__right { display: flex; align-items: center; gap: 10px; }
+.fs-editor-topbar__center { position: absolute; left: 50%; transform: translateX(-50%); }
+.fs-back-btn { color: var(--fs-muted); font-size: 13px; text-decoration: none; transition: color .2s; }
+.fs-back-btn:hover { color: var(--fs-orange); }
+.fs-topbar-sep { color: var(--fs-border); font-size: 18px; }
+.fs-title-input {
+  background: transparent; border: 1px solid transparent; color: #111 !important;
+  font-family: var(--fs-font-h); font-size: 14px; font-weight: 600;
+  padding: 5px 10px; border-radius: 6px; width: 220px; transition: border-color .2s;
+}
+.fs-title-input:focus { outline: none; border-color: var(--fs-orange); background: rgba(255,110,78,.05) !important; color: #fff !important; box-shadow: none !important; }
+.fs-spark-wordmark { font-family: var(--fs-font-h); font-size: 15px; color: var(--fs-orange); letter-spacing: .04em; }
+.fs-date-label  { font-size: 11px; color: var(--fs-muted); white-space: nowrap; }
+.fs-save-status { font-size: 12px; min-width: 80px; }
+.fs-save-status--success { color: #34d399; }
+.fs-save-status--error   { color: #f87171; }
+
+/* ── Editor Layout ───────────────────────────────────────────── */
+.fs-editor-layout {
+  display: grid;
+  grid-template-columns: 180px 1fr 240px;
+  height: calc(100vh - 52px);
+  overflow: hidden;
+}
+
+/* ── Palette ─────────────────────────────────────────────────── */
+.fs-palette {
+  background: #030f13; border-right: 1px solid var(--fs-border);
+  padding: 14px 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;
+}
+.fs-palette__title { font-family: var(--fs-font-h); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--fs-orange); margin-bottom: 2px; padding: 0 4px; }
+.fs-palette__hint  { font-size: 10px; color: var(--fs-muted); padding: 0 4px; margin-bottom: 10px; }
+.fs-palette-section { margin-bottom: 12px; }
+.fs-palette-label  { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--fs-muted); padding: 0 4px; margin-bottom: 4px; }
+.fs-palette-node {
+  padding: 7px 10px; font-size: 12px; color: var(--fs-muted);
+  border-radius: 6px; cursor: grab; transition: all .15s;
+  border: 1px solid transparent; user-select: none;
+}
+.fs-palette-node:hover { background: var(--fs-card); border-color: var(--fs-border); color: var(--fs-white); }
+.fs-palette-node:active { cursor: grabbing; background: rgba(255,110,78,.1); border-color: var(--fs-orange); }
+.fs-palette-divider { border: none; border-top: 1px solid var(--fs-border); margin: 10px 0; }
+.fs-palette-action {
+  width: 100%; text-align: left; padding: 6px 10px; font-size: 11px;
+  background: transparent; border: 1px solid transparent; color: var(--fs-muted);
+  border-radius: 6px; cursor: pointer; transition: all .15s;
+}
+.fs-palette-action:hover { background: var(--fs-card); border-color: var(--fs-border); color: var(--fs-white); }
+
+/* ── Canvas Wrap ─────────────────────────────────────────────── */
+.fs-canvas-wrap {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,110,78,.04) 0%, transparent 60%),
+    radial-gradient(circle at 80% 70%, rgba(232,184,75,.03) 0%, transparent 60%),
+    var(--fs-teal);
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px;
+  cursor: default;
+}
+.fs-canvas-wrap.fs-canvas--connecting { cursor: crosshair; }
+.fs-canvas {
+  position: absolute; top: 0; left: 0;
+  width: 3000px; height: 3000px;
+  transform-origin: 0 0;
+}
+.fs-connections-svg {
+  position: absolute; top: 0; left: 0;
+  width: 3000px; height: 3000px; pointer-events: none;
+  transform-origin: 0 0; overflow: visible;
+}
+.fs-connections-svg g { pointer-events: stroke; cursor: pointer; }
+
+/* ── Empty Canvas Hint ───────────────────────────────────────── */
+.fs-canvas-empty {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  text-align: center; pointer-events: none;
+}
+.fs-canvas-empty__icon { font-size: 48px; opacity: .3; margin-bottom: 12px; }
+.fs-canvas-empty p { color: rgba(139,163,169,.5); font-size: 15px; margin: 0 0 6px; }
+.fs-canvas-empty__hint { font-size: 12px !important; opacity: .7; }
+
+/* ── Funnel Nodes ────────────────────────────────────────────── */
+.fs-node {
+  position: absolute;
+  width: 200px; min-height: 80px;
+  background: var(--fs-card);
+  border: 2px solid rgba(255,255,255,.08);
+  border-radius: var(--fs-radius);
+  padding: 12px 14px 10px;
+  cursor: pointer; user-select: none;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+  box-sizing: border-box;
+}
+.fs-node:hover { border-color: var(--node-color, var(--fs-orange)); box-shadow: 0 0 0 1px var(--node-color, var(--fs-orange)), 0 4px 20px rgba(0,0,0,.4); }
+.fs-node--selected { border-color: var(--node-color, var(--fs-orange)) !important; box-shadow: 0 0 0 2px var(--node-color, var(--fs-orange)), 0 6px 24px rgba(0,0,0,.5) !important; }
+.fs-node--dragging { opacity: .85; transform: scale(1.02); z-index: 100; box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+.fs-node--connecting { border-color: #6366f1 !important; box-shadow: 0 0 0 2px #6366f1 !important; }
+.fs-node--connectable { border-color: rgba(99,102,241,.5) !important; }
+.fs-node--connectable:hover { border-color: #6366f1 !important; box-shadow: 0 0 0 2px #6366f1 !important; }
+
+.fs-node__header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.fs-node__icon   { font-size: 16px; flex-shrink: 0; }
+.fs-node__label  { font-family: var(--fs-font-h); font-size: 12px; font-weight: 600; color: var(--fs-white); line-height: 1.3; word-break: break-word; }
+.fs-node__url    { font-size: 10px; color: var(--fs-muted); word-break: break-all; margin-top: 2px; min-height: 14px; }
+
+/* GA4 Data Badge */
+.fs-node__badge {
+  margin-top: 8px; padding: 6px 10px; border-radius: 6px;
+  display: flex; flex-direction: column; gap: 3px;
+  font-family: var(--fs-font-h);
+  color: var(--fs-white);
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.fs-node__badge--good { background: rgba(52,211,153,.15); color: #34d399; border-color: rgba(52,211,153,.25); }
+.fs-node__badge--avg  { background: rgba(232,184,75,.12);  color: var(--fs-gold); border-color: rgba(232,184,75,.2); }
+.fs-node__badge--low  { background: rgba(248,113,113,.12); color: #f87171; border-color: rgba(248,113,113,.2); }
+.fs-node__badge--ad   { background: rgba(99,102,241,.15);  color: #a5b4fc; border-color: rgba(99,102,241,.3); }
+.fs-badge-row { display: flex; justify-content: space-between; align-items: center; }
+.fs-badge-row--pct { border-top: 1px solid rgba(255,255,255,.08); margin-top: 2px; padding-top: 4px; }
+.fs-badge-row--cvr { border-top: 1px solid rgba(255,255,255,.08); margin-top: 2px; padding-top: 4px; }
+.fs-badge-val { font-size: 12px; font-weight: 700; color: var(--fs-white); }
+.fs-badge-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
+
+/* Connect Button */
+.fs-node__connect-btn {
+  position: absolute; right: -12px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; background: var(--fs-card2);
+  border: 2px solid var(--node-color, var(--fs-orange));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--node-color, var(--fs-orange));
+  cursor: pointer; transition: all .15s; opacity: 0; z-index: 10;
+}
+.fs-node:hover .fs-node__connect-btn { opacity: 1; }
+.fs-node__connect-btn:hover { background: var(--node-color, var(--fs-orange)); color: #fff; transform: translateY(-50%) scale(1.15); }
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.fs-sidebar {
+  background: #030f13; border-left: 1px solid var(--fs-border);
+  overflow-y: auto; display: flex; flex-direction: column; gap: 0;
+}
+
+/* Inspector */
+.fs-inspector, .fs-inspector-empty {
+  padding: 16px; border-bottom: 1px solid var(--fs-border);
+}
+.fs-inspector__title { font-family: var(--fs-font-h); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--fs-orange); margin-bottom: 14px; }
+.fs-inspector-empty { color: var(--fs-muted); font-size: 13px; }
+
+/* GA4 Summary */
+.fs-ga4-summary { padding: 16px; border-bottom: 1px solid var(--fs-border); }
+.fs-ga4-summary__title { font-family: var(--fs-font-h); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--fs-orange); margin-bottom: 12px; }
+.fs-ga4-stat { margin-bottom: 10px; }
+.fs-ga4-stat span { display: block; font-family: var(--fs-font-h); font-size: 20px; font-weight: 700; color: var(--fs-white); }
+.fs-ga4-stat--highlight span { color: var(--fs-orange); }
+.fs-ga4-stat label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--fs-muted); }
+
+/* ── Promo Sidebar ───────────────────────────────────────────── */
+.fs-promo {
+  margin: 14px; border-radius: var(--fs-radius); padding: 18px;
+  background: linear-gradient(160deg, rgba(255,110,78,.12), var(--fs-card));
+  border: 1px solid rgba(255,110,78,.3); position: relative;
+  flex-shrink: 0;
+}
+.fs-promo__dismiss {
+  position: absolute; top: 8px; right: 10px; background: none; border: none;
+  color: var(--fs-muted); font-size: 16px; cursor: pointer; line-height: 1;
+  padding: 0; transition: color .15s;
+}
+.fs-promo__dismiss:hover { color: var(--fs-white); }
+.fs-promo__badge { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--fs-orange); margin-bottom: 8px; }
+.fs-promo__icon  { font-size: 28px; margin-bottom: 6px; filter: drop-shadow(0 0 8px rgba(255,110,78,.5)); }
+.fs-promo__headline { font-family: var(--fs-font-h); font-size: 14px; color: var(--fs-white); margin: 0 0 8px; line-height: 1.3; }
+.fs-promo__body  { font-size: 12px; color: var(--fs-muted); margin-bottom: 12px; line-height: 1.6; }
+.fs-promo__list  { list-style: none; padding: 0; margin: 0 0 14px; }
+.fs-promo__list li { font-size: 11px; color: #34d399; margin-bottom: 4px; }
+.fs-promo__cta {
+  display: block; text-align: center; background: var(--fs-orange); color: #fff;
+  font-family: var(--fs-font-h); font-size: 12px; font-weight: 700;
+  padding: 10px 14px; border-radius: 8px; text-decoration: none;
+  transition: background .2s; margin-bottom: 10px;
+}
+.fs-promo__cta:hover { background: #e85c3b; color: #fff; }
+.fs-promo__powered { text-align: center; font-size: 10px; color: var(--fs-muted); margin: 0; }
+.fs-promo__powered a { color: var(--fs-orange); text-decoration: none; }
