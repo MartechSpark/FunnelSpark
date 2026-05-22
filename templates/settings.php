@@ -133,49 +133,5 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
             </div>
         </div>
 
-        <div class="fs-card" style="max-width:680px;margin-top:20px;">
-            <h3 class="fs-card__title">📣 Promo Sidebar</h3>
-            <p class="fs-hint" style="margin-bottom:16px;">
-                The promo shown in the funnel editor sidebar is pulled from
-                <code style="background:rgba(255,110,78,.1);color:#FF6E4E;padding:2px 7px;border-radius:4px;font-size:12px;">martechspark.com/funnelspark-promo.json</code>
-                and cached for 24 hours. Update the JSON file on your server to change the offer for all plugin installs — no plugin update needed.
-            </p>
-
-            <?php
-            $status       = FS_Promo::cache_status();
-            $status_color = $status['status'] === 'cached' ? '#34d399' : '#E8B84B';
-            ?>
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-                <div>
-                    <span style="font-size:12px;color:<?php echo esc_attr( $status_color ); ?>;">
-                        ● <?php echo esc_html( $status['label'] ); ?>
-                    </span>
-                </div>
-                <div style="display:flex;gap:10px;align-items:center;">
-                    <button id="fs-refresh-promo" class="fs-btn fs-btn--ghost fs-btn--sm">↻ Refresh Now</button>
-                    <a href="<?php echo esc_url( add_query_arg( 'fs_promo_refresh', '1' ) ); ?>" class="fs-btn fs-btn--ghost fs-btn--sm">🔗 Refresh via URL</a>
-                </div>
-            </div>
-
-            <div id="fs-promo-notice" style="margin-top:14px;"></div>
-
-            <div id="fs-promo-preview" style="margin-top:16px;display:none;">
-                <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--fs-muted,#8BA3A9);margin-bottom:10px;">Live Preview — Current Offer</div>
-                <div class="fs-promo-preview-box">
-                    <div id="fs-promo-preview-badge"   class="fs-promo__badge"></div>
-                    <div id="fs-promo-preview-icon"    class="fs-promo__icon"></div>
-                    <div id="fs-promo-preview-head"    class="fs-promo__headline" style="font-size:14px;margin-bottom:6px;"></div>
-                    <div id="fs-promo-preview-body"    class="fs-promo__body"></div>
-                    <ul  id="fs-promo-preview-bullets" class="fs-promo__list"></ul>
-                    <div id="fs-promo-preview-cta"     class="fs-promo__cta" style="text-align:center;padding:8px;border-radius:8px;margin-bottom:8px;"></div>
-                    <div id="fs-promo-preview-pow"     class="fs-promo__powered"></div>
-                </div>
-            </div>
-
-            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--fs-border, rgba(255,110,78,.18));">
-                <p class="fs-hint"><strong>Testing tip:</strong> Update <code style="background:rgba(255,110,78,.1);color:#FF6E4E;padding:2px 6px;border-radius:4px;font-size:11px;">funnelspark-promo.json</code> on your server, click <em>Refresh Now</em>, then open the funnel editor to see your new offer immediately — no waiting 24 hours.</p>
-            </div>
-        </div>
-
     </div>
 </div>
