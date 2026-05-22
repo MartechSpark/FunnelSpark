@@ -10,6 +10,9 @@
     // ── Module-level cache for GA4 paid sources ────────────────────────
     let ga4Sources = null;
 
+    // ── Cleanup fn for active connection drag (set by startConnectionDrag) ─
+    let cleanupConnectionDrag = null;
+
     // ── State ──────────────────────────────────────────────────────────
     const state = {
         nodes:       {},   // { id: { id, type, label, url, notes, x, y, el } }
@@ -156,10 +159,11 @@
             selectNode( id );
         });
 
-        // Connect button
-        el.querySelector('.fs-node__connect-btn').addEventListener('click', e => {
+        // Connect button — drag to create connection
+        el.querySelector('.fs-node__connect-btn').addEventListener('mousedown', e => {
             e.stopPropagation();
-            startConnection( id );
+            e.preventDefault();
+            startConnectionDrag( id, e );
         });
 
         updateEmptyHint();
@@ -212,6 +216,11 @@
             return;
         }
 
+        // Auto-save current node before switching
+        if ( state.selected && state.selected !== id ) {
+            commitInspector();
+        }
+
         // Deselect previous
         if ( state.selected ) {
             const prev = document.getElementById('fs-node-' + state.selected);
@@ -224,15 +233,6 @@
     }
 
     // ── Connections ────────────────────────────────────────────────────
-    function startConnection( id ) {
-        state.connecting = id;
-        document.getElementById('fs-node-' + id)?.classList.add('fs-node--connecting');
-        document.querySelectorAll('.fs-node').forEach( el => {
-            if ( el.dataset.id !== id ) el.classList.add('fs-node--connectable');
-        });
-        canvas.classList.add('fs-canvas--connecting');
-    }
-
     function cancelConnection() {
         if ( state.connecting ) {
             document.getElementById('fs-node-' + state.connecting)?.classList.remove('fs-node--connecting');
@@ -253,7 +253,16 @@
         const g  = document.createElementNS('http://www.w3.org/2000/svg','g');
         g.id     = id;
 
-        const path   = document.createElementNS('http://www.w3.org/2000/svg','path');
+        // Wide transparent hit area makes hovering easy on the thin curve
+        const hitArea = document.createElementNS('http://www.w3.org/2000/svg','path');
+        hitArea.setAttribute('class', 'fs-conn-hit');
+        hitArea.setAttribute('stroke', 'transparent');
+        hitArea.setAttribute('stroke-width', '16');
+        hitArea.setAttribute('fill', 'none');
+        hitArea.style.cursor = 'pointer';
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('class', 'fs-conn-path');
         path.setAttribute('stroke', '#FF6E4E');
         path.setAttribute('stroke-width', '2');
         path.setAttribute('fill', 'none');
@@ -261,17 +270,46 @@
         path.setAttribute('marker-end', 'url(#fs-arrowhead)');
 
         const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+        label.setAttribute('class', 'fs-conn-label');
         label.setAttribute('fill', '#8BA3A9');
         label.setAttribute('font-size', '11');
         label.setAttribute('text-anchor', 'middle');
         label.setAttribute('dominant-baseline', 'middle');
 
+        // × delete button — appears at midpoint on hover
+        const delGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+        delGroup.setAttribute('class', 'fs-conn-del');
+        delGroup.style.display = 'none';
+        delGroup.style.cursor  = 'pointer';
+
+        const delCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        delCircle.setAttribute('r', '9');
+        delCircle.setAttribute('fill', '#ef4444');
+        delCircle.setAttribute('stroke', '#fff');
+        delCircle.setAttribute('stroke-width', '1.5');
+
+        const delText = document.createElementNS('http://www.w3.org/2000/svg','text');
+        delText.setAttribute('text-anchor', 'middle');
+        delText.setAttribute('dominant-baseline', 'middle');
+        delText.setAttribute('fill', '#fff');
+        delText.setAttribute('font-size', '14');
+        delText.setAttribute('font-weight', 'bold');
+        delText.textContent = '×';
+
+        delGroup.appendChild(delCircle);
+        delGroup.appendChild(delText);
+
+        g.appendChild(hitArea);
         g.appendChild(path);
         g.appendChild(label);
+        g.appendChild(delGroup);
         svg.appendChild(g);
 
-        // Delete on double-click
-        g.addEventListener('dblclick', () => {
+        g.addEventListener('mouseenter', () => { delGroup.style.display = ''; });
+        g.addEventListener('mouseleave', () => { delGroup.style.display = 'none'; });
+
+        delGroup.addEventListener('click', e => {
+            e.stopPropagation();
             state.connections = state.connections.filter( c => ! ( c.from === fromId && c.to === toId ) );
             g.remove();
         });
@@ -305,21 +343,22 @@
         if ( !fn || !tn ) return;
 
         const fw = 200, fh = 80;
-        const x1 = fn.x + fw;
-        const y1 = fn.y + fh / 2;
-        const x2 = tn.x;
-        const y2 = tn.y + fh / 2;
+        const x1  = fn.x + fw;
+        const y1  = fn.y + fh / 2;
+        const x2  = tn.x;
+        const y2  = tn.y + fh / 2;
         const cx1 = x1 + Math.abs(x2 - x1) * 0.5;
         const cx2 = x2 - Math.abs(x2 - x1) * 0.5;
+        const d   = `M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}`;
 
-        const path  = conn.el.querySelector('path');
-        const label = conn.el.querySelector('text');
-        path.setAttribute('d', `M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}`);
+        conn.el.querySelector('.fs-conn-path')?.setAttribute('d', d);
+        conn.el.querySelector('.fs-conn-hit')?.setAttribute('d', d);
 
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2 - 10;
-        label.setAttribute('x', mx);
-        label.setAttribute('y', my);
+        const mx  = (x1 + x2) / 2;
+        const my  = (y1 + y2) / 2 - 10;
+        const lbl = conn.el.querySelector('.fs-conn-label');
+        if ( lbl ) { lbl.setAttribute('x', mx); lbl.setAttribute('y', my); }
+        conn.el.querySelector('.fs-conn-del')?.setAttribute('transform', `translate(${mx},${my})`);
     }
 
     function redrawConnections() {
@@ -369,6 +408,7 @@
     }
 
     function deselectNode() {
+        commitInspector();
         if ( state.selected ) {
             document.getElementById('fs-node-' + state.selected)?.classList.remove('fs-node--selected');
         }
@@ -411,12 +451,73 @@
 
     // ── Connection Mode Setup ──────────────────────────────────────
     function setupConnectionMode() {
-        // Escape cancels an in-progress connection
         document.addEventListener('keydown', e => {
             if ( e.key === 'Escape' && state.connecting ) {
-                cancelConnection();
+                if ( cleanupConnectionDrag ) {
+                    cleanupConnectionDrag();
+                    cleanupConnectionDrag = null;
+                } else {
+                    cancelConnection();
+                }
             }
         });
+    }
+
+    // ── Drag-to-Connect ────────────────────────────────────────────
+    function startConnectionDrag( fromId, startEvent ) {
+        if ( state.connecting ) return;
+
+        state.connecting = fromId;
+        document.getElementById('fs-node-' + fromId)?.classList.add('fs-node--connecting');
+        document.querySelectorAll('.fs-node').forEach( el => {
+            if ( el.dataset.id !== fromId ) el.classList.add('fs-node--connectable');
+        });
+        canvas.classList.add('fs-canvas--connecting');
+
+        const previewPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+        previewPath.id = 'fs-conn-preview';
+        previewPath.setAttribute('stroke', '#FF6E4E');
+        previewPath.setAttribute('stroke-width', '2');
+        previewPath.setAttribute('fill', 'none');
+        previewPath.setAttribute('stroke-dasharray', '6 3');
+        previewPath.setAttribute('marker-end', 'url(#fs-arrowhead)');
+        previewPath.setAttribute('pointer-events', 'none');
+        svg.appendChild( previewPath );
+        ensureArrowhead();
+
+        function cleanup() {
+            previewPath.remove();
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            cancelConnection();
+        }
+
+        cleanupConnectionDrag = cleanup;
+
+        function onMove(e) {
+            const fn = state.nodes[fromId];
+            if ( !fn ) return;
+            const rect = wrap.getBoundingClientRect();
+            const tx   = ( e.clientX - rect.left - state.pan.x ) / state.zoom;
+            const ty   = ( e.clientY - rect.top  - state.pan.y ) / state.zoom;
+            const x1   = fn.x + 200, y1 = fn.y + 40;
+            const dx   = Math.abs(tx - x1) * 0.5;
+            previewPath.setAttribute('d', `M${x1},${y1} C${x1+dx},${y1} ${tx-dx},${ty} ${tx},${ty}`);
+        }
+
+        function onUp(e) {
+            cleanup();
+            cleanupConnectionDrag = null;
+            const target = document.elementFromPoint( e.clientX, e.clientY );
+            const nodeEl = target?.closest?.('.fs-node');
+            const toId   = nodeEl?.dataset?.id;
+            if ( toId && toId !== fromId && !connectionExists(fromId, toId) ) {
+                drawConnection( fromId, toId );
+            }
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
     }
 
     // ── Page Dropdown ─────────────────────────────────────────────────
@@ -497,32 +598,36 @@
     }
 
     // ── Inspector ─────────────────────────────────────────────────────
+
+    function commitInspector() {
+        if ( !state.selected ) return;
+        const n  = state.nodes[ state.selected ];
+        const el = document.getElementById('fs-node-' + state.selected);
+        if ( !n || !el ) return;
+
+        const labelVal = document.getElementById('fs-node-label')?.value?.trim();
+        if ( labelVal ) n.label = labelVal;
+        n.notes      = document.getElementById('fs-node-notes')?.value?.trim() || '';
+        n.conversion = !! document.getElementById('fs-node-conversion')?.checked;
+
+        if ( n.type === 'ad' ) {
+            const sourceSel = document.getElementById('fs-node-source');
+            n.source = sourceSel ? sourceSel.value : '';
+            n.url    = '';
+            el.querySelector('.fs-node__label').textContent = n.label;
+            el.querySelector('.fs-node__url').textContent   = n.source;
+        } else {
+            n.url    = document.getElementById('fs-node-url')?.value?.trim() || '';
+            n.source = '';
+            el.querySelector('.fs-node__label').textContent = n.label;
+            el.querySelector('.fs-node__url').textContent   = n.url;
+        }
+    }
+
     function bindInspector() {
         document.getElementById('fs-update-node')?.addEventListener('click', () => {
             if ( !state.selected ) return;
-            const n  = state.nodes[ state.selected ];
-            const el = document.getElementById('fs-node-' + state.selected);
-
-            n.label      = document.getElementById('fs-node-label').value.trim() || n.label;
-            n.notes      = document.getElementById('fs-node-notes').value.trim();
-            n.conversion = document.getElementById('fs-node-conversion').checked;
-
-            if ( n.type === 'ad' ) {
-                const sourceSel = document.getElementById('fs-node-source');
-                n.source = sourceSel ? sourceSel.value : '';
-                n.url    = '';
-                if ( el ) {
-                    el.querySelector('.fs-node__label').textContent = n.label;
-                    el.querySelector('.fs-node__url').textContent   = n.source;
-                }
-            } else {
-                n.url    = document.getElementById('fs-node-url').value.trim();
-                n.source = '';
-                if ( el ) {
-                    el.querySelector('.fs-node__label').textContent = n.label;
-                    el.querySelector('.fs-node__url').textContent   = n.url;
-                }
-            }
+            commitInspector();
         });
 
         document.getElementById('fs-delete-node')?.addEventListener('click', () => {
