@@ -203,14 +203,20 @@ class FS_GA4_Client {
             ],
             'dimensionFilter' => [
                 'orGroup' => [
-                    'expressions' => array_map( function( $path ) {
-                        return [
-                            'filter' => [
-                                'fieldName'    => 'pagePath',
-                                'stringFilter' => [ 'matchType' => 'CONTAINS', 'value' => $path ],
-                            ],
-                        ];
-                    }, $page_paths ),
+                    'expressions' => array_values( array_reduce( $page_paths, function( $carry, $path ) {
+                        $base = rtrim( $path, '/' ) ?: '/';
+                        // Match both "/slug" and "/slug/" to handle GA4's trailing-slash variance.
+                        $variants = ( $base === '/' ) ? [ '/' ] : [ $base, $base . '/' ];
+                        foreach ( $variants as $v ) {
+                            $carry[] = [
+                                'filter' => [
+                                    'fieldName'    => 'pagePath',
+                                    'stringFilter' => [ 'matchType' => 'EXACT', 'value' => $v ],
+                                ],
+                            ];
+                        }
+                        return $carry;
+                    }, [] ) ),
                 ],
             ],
         ];
