@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,9 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 
 == Changelog ==
 
+= 1.2.5 =
+* New: click any connection arrow to select it — the right panel shows From/To labels and a Delete Connection button; clicking empty canvas deselects
+
 = 1.2.4 =
 * Fix: connection × delete button now reliably appears when hovering over a connection — replaced SVG pointer-events approach (broken in all browsers when parent SVG has pointer-events:none) with an HTML button overlay and canvas-level proximity detection
 
@@ -104,6 +107,9 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.2.5 =
+Click any connection arrow to select it and delete it from the inspector panel.
 
 = 1.2.4 =
 Fixes the connection × delete button not appearing on hover. Upgrade recommended.

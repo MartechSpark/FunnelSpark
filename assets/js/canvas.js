@@ -15,14 +15,15 @@
 
     // ── State ──────────────────────────────────────────────────────────
     const state = {
-        nodes:       {},   // { id: { id, type, label, url, notes, x, y, el } }
-        connections: [],   // [ { from, to, el } ]  (el = SVG <g> element)
-        selected:    null, // currently selected node id
-        connecting:  null, // node id waiting for connection target
-        dragging:    null, // { id, startX, startY, origX, origY }
-        pan:         { x: 0, y: 0 },
-        zoom:        1,
-        nodeCounter: 0,
+        nodes:        {},    // { id: { id, type, label, url, notes, x, y, el } }
+        connections:  [],    // [ { from, to, el } ]  (el = SVG <g> element)
+        selected:     null,  // currently selected node id
+        selectedConn: null,  // currently selected connection object
+        connecting:   null,  // node id waiting for connection target
+        dragging:     null,  // { id, startX, startY, origX, origY }
+        pan:          { x: 0, y: 0 },
+        zoom:         1,
+        nodeCounter:  0,
     };
 
     // ── DOM Refs ───────────────────────────────────────────────────────
@@ -57,7 +58,6 @@
         setupCanvasPan();
         setupZoomButtons();
         setupConnectionMode();
-        setupConnectionHover();
         bindInspector();
         bindSaveButton();
         bindClearButton();
@@ -218,6 +218,8 @@
             return;
         }
 
+        deselectConnection();
+
         // Auto-save current node before switching
         if ( state.selected && state.selected !== id ) {
             commitInspector();
@@ -255,6 +257,13 @@
         const g  = document.createElementNS('http://www.w3.org/2000/svg','g');
         g.id     = id;
 
+        // Wide transparent path used for isPointInStroke() hit-testing on click
+        const hitArea = document.createElementNS('http://www.w3.org/2000/svg','path');
+        hitArea.setAttribute('class', 'fs-conn-hit');
+        hitArea.setAttribute('stroke', 'rgba(0,0,0,0)');
+        hitArea.setAttribute('stroke-width', '12');
+        hitArea.setAttribute('fill', 'none');
+
         const path = document.createElementNS('http://www.w3.org/2000/svg','path');
         path.setAttribute('class', 'fs-conn-path');
         path.setAttribute('stroke', '#FF6E4E');
@@ -270,26 +279,12 @@
         label.setAttribute('text-anchor', 'middle');
         label.setAttribute('dominant-baseline', 'middle');
 
+        g.appendChild(hitArea);
         g.appendChild(path);
         g.appendChild(label);
         svg.appendChild(g);
 
-        // HTML delete button — lives in the wrap div, not the SVG, so pointer-events always work
-        const delBtn = document.createElement('button');
-        delBtn.className = 'fs-conn-del-btn';
-        delBtn.setAttribute('aria-label', 'Delete connection');
-        delBtn.textContent = '×';
-        wrap.appendChild(delBtn);
-
-        const conn = { from: fromId, to: toId, el: g, delBtn };
-
-        delBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            state.connections = state.connections.filter( c => c !== conn );
-            g.remove();
-            delBtn.remove();
-        });
-
+        const conn = { from: fromId, to: toId, el: g };
         state.connections.push(conn);
         updateConnectionPath(conn);
         ensureArrowhead();
@@ -328,44 +323,66 @@
         const d   = `M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}`;
 
         conn.el.querySelector('.fs-conn-path')?.setAttribute('d', d);
+        conn.el.querySelector('.fs-conn-hit')?.setAttribute('d', d);
 
         const mx  = (x1 + x2) / 2;
         const my  = (y1 + y2) / 2 - 10;
         const lbl = conn.el.querySelector('.fs-conn-label');
         if ( lbl ) { lbl.setAttribute('x', mx); lbl.setAttribute('y', my); }
-
-        // Keep HTML delete button centred at the connection midpoint in screen space
-        if ( conn.delBtn ) {
-            conn.delBtn.style.left = ( mx * state.zoom + state.pan.x ) + 'px';
-            conn.delBtn.style.top  = ( my * state.zoom + state.pan.y ) + 'px';
-        }
     }
 
     function redrawConnections() {
         state.connections.forEach( conn => updateConnectionPath(conn) );
     }
 
-    // ── Connection Hover (proximity-based, avoids SVG pointer-events issues) ──
-    function setupConnectionHover() {
-        wrap.addEventListener('mousemove', e => {
-            const rect = wrap.getBoundingClientRect();
-            const sx   = e.clientX - rect.left;
-            const sy   = e.clientY - rect.top;
+    // ── Connection Click-to-Select ────────────────────────────────────
+    function getConnectionAtPoint( clientX, clientY ) {
+        const rect = wrap.getBoundingClientRect();
+        // Convert screen coords → canvas space (hitArea paths are drawn in canvas coords)
+        const cx = ( clientX - rect.left - state.pan.x ) / state.zoom;
+        const cy = ( clientY - rect.top  - state.pan.y ) / state.zoom;
 
-            state.connections.forEach( conn => {
-                if ( !conn.delBtn ) return;
-                const bx   = parseFloat( conn.delBtn.style.left ) || 0;
-                const by   = parseFloat( conn.delBtn.style.top )  || 0;
-                const dist = Math.sqrt( (sx - bx) * (sx - bx) + (sy - by) * (sy - by) );
-                conn.delBtn.style.display = dist < 24 ? '' : 'none';
-            });
-        });
+        const pt = svg.createSVGPoint();
+        pt.x = cx;
+        pt.y = cy;
 
-        wrap.addEventListener('mouseleave', () => {
-            state.connections.forEach( conn => {
-                if ( conn.delBtn ) conn.delBtn.style.display = 'none';
-            });
-        });
+        return state.connections.find( conn => {
+            const hit = conn.el.querySelector('.fs-conn-hit');
+            return hit && hit.isPointInStroke( pt );
+        }) || null;
+    }
+
+    function selectConnection( conn ) {
+        if ( state.selectedConn && state.selectedConn !== conn ) {
+            // Restore previous connection's appearance
+            state.selectedConn.el.querySelector('.fs-conn-path')?.setAttribute('stroke', '#FF6E4E');
+            state.selectedConn.el.querySelector('.fs-conn-path')?.setAttribute('stroke-width', '2');
+        }
+
+        // Deselect any selected node without resetting to empty state yet
+        if ( state.selected ) {
+            document.getElementById('fs-node-' + state.selected)?.classList.remove('fs-node--selected');
+            state.selected = null;
+        }
+
+        state.selectedConn = conn;
+        conn.el.querySelector('.fs-conn-path')?.setAttribute('stroke', '#facc15');
+        conn.el.querySelector('.fs-conn-path')?.setAttribute('stroke-width', '3');
+
+        document.getElementById('fs-conn-from').textContent        = state.nodes[conn.from]?.label || '—';
+        document.getElementById('fs-conn-to').textContent          = state.nodes[conn.to]?.label   || '—';
+        document.getElementById('fs-inspector').style.display      = 'none';
+        document.getElementById('fs-inspector-empty').style.display = 'none';
+        document.getElementById('fs-conn-inspector').style.display = '';
+    }
+
+    function deselectConnection() {
+        if ( !state.selectedConn ) return;
+        state.selectedConn.el.querySelector('.fs-conn-path')?.setAttribute('stroke', '#FF6E4E');
+        state.selectedConn.el.querySelector('.fs-conn-path')?.setAttribute('stroke-width', '2');
+        state.selectedConn = null;
+        document.getElementById('fs-conn-inspector').style.display  = 'none';
+        document.getElementById('fs-inspector-empty').style.display = state.selected ? 'none' : '';
     }
 
     // ── Canvas Pan ─────────────────────────────────────────────────────
@@ -399,12 +416,21 @@
             applyTransform();
         }, { passive: false });
 
-        // Cancel connection on canvas click
+        // Canvas click: detect connection clicks, cancel connecting mode, deselect
         wrap.addEventListener('click', e => {
-            if ( state.connecting && ( e.target === wrap || e.target === canvas || e.target === svg ) ) {
-                cancelConnection();
+            if ( state.connecting ) {
+                if ( e.target === wrap || e.target === canvas || e.target === svg ) cancelConnection();
+                return;
             }
-            if ( e.target === wrap || e.target === canvas ) {
+
+            const hitConn = getConnectionAtPoint( e.clientX, e.clientY );
+            if ( hitConn ) {
+                selectConnection( hitConn );
+                return;
+            }
+
+            if ( e.target === wrap || e.target === canvas || e.target === svg ) {
+                deselectConnection();
                 deselectNode();
             }
         });
@@ -416,15 +442,14 @@
             document.getElementById('fs-node-' + state.selected)?.classList.remove('fs-node--selected');
         }
         state.selected = null;
-        document.getElementById('fs-inspector').style.display      = 'none';
-        document.getElementById('fs-inspector-empty').style.display = '';
+        document.getElementById('fs-inspector').style.display       = 'none';
+        document.getElementById('fs-inspector-empty').style.display = state.selectedConn ? 'none' : '';
     }
 
     function applyTransform() {
         const t = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.zoom})`;
         canvas.style.transform = t;
         svg.style.transform    = t;
-        redrawConnections(); // reposition HTML delete buttons to match new pan/zoom
     }
 
     // ── Zoom ───────────────────────────────────────────────────────────
@@ -638,6 +663,16 @@
             if ( !state.selected ) return;
             deleteNode( state.selected );
         });
+
+        document.getElementById('fs-delete-conn')?.addEventListener('click', () => {
+            if ( !state.selectedConn ) return;
+            const conn = state.selectedConn;
+            state.connections  = state.connections.filter( c => c !== conn );
+            state.selectedConn = null;
+            conn.el.remove();
+            document.getElementById('fs-conn-inspector').style.display  = 'none';
+            document.getElementById('fs-inspector-empty').style.display = '';
+        });
     }
 
     function populateInspector( id ) {
@@ -662,6 +697,7 @@
             }
         }
 
+        document.getElementById('fs-conn-inspector').style.display  = 'none';
         document.getElementById('fs-inspector').style.display       = '';
         document.getElementById('fs-inspector-empty').style.display = 'none';
     }
@@ -671,11 +707,19 @@
         delete state.nodes[ id ];
 
         state.connections = state.connections.filter( c => {
-            if ( c.from === id || c.to === id ) { c.el?.remove(); return false; }
+            if ( c.from === id || c.to === id ) {
+                if ( state.selectedConn === c ) state.selectedConn = null;
+                c.el?.remove();
+                return false;
+            }
             return true;
         });
 
         deselectNode();
+        if ( !state.selectedConn ) {
+            document.getElementById('fs-conn-inspector').style.display  = 'none';
+            document.getElementById('fs-inspector-empty').style.display = '';
+        }
         updateEmptyHint();
     }
 
@@ -690,8 +734,10 @@
             state.connections.forEach( c => c.el?.remove() );
             state.connections = [];
             state.selected    = null;
+            state.selectedConn = null;
             state.nodeCounter = 0;
             document.getElementById('fs-inspector').style.display       = 'none';
+            document.getElementById('fs-conn-inspector').style.display  = 'none';
             document.getElementById('fs-inspector-empty').style.display = '';
             updateEmptyHint();
         });
