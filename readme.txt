@@ -71,6 +71,29 @@ Unlimited.
 = Does it work with WooCommerce? =
 Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as funnel steps and track conversion rates with GA4.
 
+== External Services ==
+
+FunnelSpark connects to two external services, both only from the WordPress admin area. No external connections are made on your public-facing site.
+
+= Google Analytics Data API =
+
+When you connect a GA4 property, FunnelSpark communicates with the following Google endpoints:
+
+* `https://accounts.google.com` — OAuth 2.0 authorization
+* `https://oauth2.googleapis.com` — token exchange and refresh
+* `https://analyticsdata.googleapis.com` — fetching GA4 report data
+
+These requests are made only after you explicitly authorize your Google account through the OAuth flow in FunnelSpark → Settings. No GA4 data is transmitted to MarTech Spark or any third party — data flows directly from Google to your WordPress site.
+
+* Google Privacy Policy: https://policies.google.com/privacy
+* Google Terms of Service: https://policies.google.com/terms
+
+= MarTech Spark Promo Feed =
+
+FunnelSpark periodically fetches a small JSON file from `https://martechspark.com/funnelspark-promo.json` to display promotional content in the plugin editor sidebar. This request is made only on admin pages and is cached for 1 hour. The request includes the plugin version and your site URL in the HTTP user-agent string (`FunnelSpark/x.x.x`). No personal data or analytics data is transmitted. You can dismiss the promo sidebar at any time.
+
+* MarTech Spark Privacy Policy: https://martechspark.com/privacy-policy/
+
 == Screenshots ==
 
 1. FunnelSpark canvas — drag-and-drop funnel builder with live GA4 data badges
