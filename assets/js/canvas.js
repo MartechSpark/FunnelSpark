@@ -103,7 +103,8 @@
             const rect = wrap.getBoundingClientRect();
             const x    = ( e.clientX - rect.left - state.pan.x ) / state.zoom;
             const y    = ( e.clientY - rect.top  - state.pan.y ) / state.zoom;
-            createNode( type, x - 80, y - 30 );
+            const id   = createNode( type, x - 80, y - 30 );
+            selectNode( id );
         });
     }
 
