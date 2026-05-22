@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,10 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.7 =
+* Update: promo JSON cache reduced from 24 hours to 1 hour
+* Update: Promo Sidebar section removed from Settings page
 
 = 1.2.6 =
 * Fix: adding nodes to an existing (saved) funnel no longer overwrites earlier nodes — nodeCounter now tracks the highest loaded ID so new nodes always get a unique ID

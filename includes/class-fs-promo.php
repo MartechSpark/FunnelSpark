@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class FS_Promo {
 
     const TRANSIENT_KEY = 'fs_remote_promo';
-    const CACHE_TTL     = DAY_IN_SECONDS;
+    const CACHE_TTL     = HOUR_IN_SECONDS;
     const REMOTE_URL    = 'https://martechspark.com/funnelspark-promo.json';
 
     // ── Fallback defaults (shown if remote fetch fails) ────────────────
