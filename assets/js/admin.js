@@ -94,6 +94,47 @@
             .always(() => { $btn.prop('disabled', false); $spin.hide(); });
         });
 
+        // ── GA4 Property Info (Settings page) ────────────────────────
+        if ( $('#fs-property-loading').length ) {
+            $.post(FS.ajax_url, { action: 'fs_get_ga4_property_info', nonce: FS.nonce })
+            .done(function(resp) {
+                $('#fs-property-loading').hide();
+                if ( resp.success ) {
+                    $('#fs-prop-name').text( resp.data.property_name || '—' );
+                    $('#fs-prop-id').text( 'properties/' + resp.data.property_id );
+
+                    var streams = resp.data.streams || [];
+                    if ( streams.length ) {
+                        var html = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);">'
+                            + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--fs-muted);margin-bottom:8px;">Data Streams</div>';
+                        streams.forEach(function(s) {
+                            html += '<div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);">';
+                            if ( s.measurement_id ) {
+                                html += '<code style="background:rgba(255,110,78,.1);color:#FF6E4E;padding:2px 7px;border-radius:4px;font-size:12px;flex-shrink:0;">' + esc(s.measurement_id) + '</code>';
+                            }
+                            if ( s.name ) {
+                                html += '<span style="color:var(--fs-white);font-size:13px;">' + esc(s.name) + '</span>';
+                            }
+                            if ( s.uri ) {
+                                html += '<span style="color:var(--fs-muted);font-size:11px;margin-left:auto;">' + esc(s.uri) + '</span>';
+                            }
+                            html += '</div>';
+                        });
+                        html += '</div>';
+                        $('#fs-prop-streams').html(html);
+                    }
+
+                    $('#fs-property-details').show();
+                } else {
+                    $('#fs-property-error').text('Could not load property info: ' + ( resp.data || 'unknown error' ) ).show();
+                }
+            })
+            .fail(function() {
+                $('#fs-property-loading').hide();
+                $('#fs-property-error').text('Network error loading property info.').show();
+            });
+        }
+
         // ── Disconnect GA4 ─────────────────────────────────────────────
         $('#fs-disconnect-ga4').on('click', function() {
             if (!confirm('Disconnect Google Analytics? You will need to reconnect to restore live data overlays.')) return;
