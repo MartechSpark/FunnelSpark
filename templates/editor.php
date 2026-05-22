@@ -158,7 +158,18 @@ wp_print_styles();
         </div>
 
         <div class="fs-inspector-empty" id="fs-inspector-empty">
-            <p>Click a funnel step to edit its settings.</p>
+            <p>Click a funnel step to edit its settings, or click an arrow to delete it.</p>
+        </div>
+
+        <!-- Connection Inspector -->
+        <div class="fs-inspector" id="fs-conn-inspector" style="display:none;">
+            <div class="fs-inspector__title">Connection</div>
+            <div style="margin-bottom:14px;font-size:13px;color:var(--fs-white);">
+                <span id="fs-conn-from" style="font-weight:600;">—</span>
+                <span style="margin:0 8px;color:var(--fs-muted);">→</span>
+                <span id="fs-conn-to" style="font-weight:600;">—</span>
+            </div>
+            <button id="fs-delete-conn" class="fs-btn fs-btn--danger fs-btn--sm" style="width:100%;">Delete Connection</button>
         </div>
 
         <!-- GA4 Summary -->
