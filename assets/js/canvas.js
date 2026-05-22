@@ -256,10 +256,11 @@
         // Wide transparent hit area makes hovering easy on the thin curve
         const hitArea = document.createElementNS('http://www.w3.org/2000/svg','path');
         hitArea.setAttribute('class', 'fs-conn-hit');
-        hitArea.setAttribute('stroke', 'transparent');
+        hitArea.setAttribute('stroke', 'rgba(0,0,0,0.001)');
         hitArea.setAttribute('stroke-width', '16');
         hitArea.setAttribute('fill', 'none');
         hitArea.style.cursor = 'pointer';
+        hitArea.style.pointerEvents = 'all';
 
         const path = document.createElementNS('http://www.w3.org/2000/svg','path');
         path.setAttribute('class', 'fs-conn-path');
@@ -279,8 +280,9 @@
         // × delete button — appears at midpoint on hover
         const delGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
         delGroup.setAttribute('class', 'fs-conn-del');
-        delGroup.style.display = 'none';
-        delGroup.style.cursor  = 'pointer';
+        delGroup.style.display       = 'none';
+        delGroup.style.cursor        = 'pointer';
+        delGroup.style.pointerEvents = 'all';
 
         const delCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
         delCircle.setAttribute('r', '9');
@@ -305,8 +307,12 @@
         g.appendChild(delGroup);
         svg.appendChild(g);
 
-        g.addEventListener('mouseenter', () => { delGroup.style.display = ''; });
-        g.addEventListener('mouseleave', () => { delGroup.style.display = 'none'; });
+        g.addEventListener('mouseover', e => {
+            if ( !g.contains(e.relatedTarget) ) delGroup.style.display = '';
+        });
+        g.addEventListener('mouseout', e => {
+            if ( !g.contains(e.relatedTarget) ) delGroup.style.display = 'none';
+        });
 
         delGroup.addEventListener('click', e => {
             e.stopPropagation();
