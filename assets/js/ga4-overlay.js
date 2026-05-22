@@ -134,13 +134,9 @@
             const path = extractPath( node.url );
             if ( !path ) return;
 
-            let matchedKey = keys.find( k => k === path || k.replace(/\/$/, '') === path );
-            if ( !matchedKey ) {
-                matchedKey = keys.find( k => {
-                    if ( k === '/' || k.length <= 1 ) return false;
-                    return path.startsWith(k) || k.startsWith(path);
-                });
-            }
+            // Exact match only: compare normalised paths (strip trailing slashes) to
+            // handle GA4's trailing-slash variance without risking false positives.
+            const matchedKey = keys.find( k => k === path || k.replace(/\/$/, '') === path );
             if ( matchedKey ) nodeMet[ node.id ] = { ...metrics[ matchedKey ] };
         });
 
