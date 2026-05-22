@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,9 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 
 == Changelog ==
 
+= 1.2.6 =
+* Fix: adding nodes to an existing (saved) funnel no longer overwrites earlier nodes — nodeCounter now tracks the highest loaded ID so new nodes always get a unique ID
+
 = 1.2.5 =
 * New: click any connection arrow to select it — the right panel shows From/To labels and a Delete Connection button; clicking empty canvas deselects
 
@@ -107,6 +110,9 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.2.6 =
+Fixes adding nodes to a saved funnel overwriting existing nodes. Upgrade recommended.
 
 = 1.2.5 =
 Click any connection arrow to select it and delete it from the inspector panel.

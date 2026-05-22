@@ -112,6 +112,9 @@
     // ── Create Node ────────────────────────────────────────────────────
     function createNode( type, x, y, data = {} ) {
         const id     = data.id || 'node_' + ( ++state.nodeCounter );
+        // Keep nodeCounter above any loaded IDs so new nodes never collide
+        const m = String(id).match( /^node_(\d+)$/ );
+        if ( m ) state.nodeCounter = Math.max( state.nodeCounter, parseInt( m[1], 10 ) );
         const config = NODE_TYPES[ type ] || NODE_TYPES.page;
         const label  = data.label || config.label;
 
