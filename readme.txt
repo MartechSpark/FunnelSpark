@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.9
+Stable tag: 1.2.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,9 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.10 =
+* Fix: funnel steps with a URL configured but zero GA4 sessions now show a "0 Sessions" badge instead of no badge
 
 = 1.2.9 =
 * Fix: GA4 query now uses EXACT path matching (both with and without trailing slash) instead of CONTAINS — prevents the home page "/" filter from pulling in all site traffic and stops unrelated pages from being matched to funnel nodes

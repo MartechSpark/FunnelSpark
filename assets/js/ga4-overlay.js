@@ -136,8 +136,11 @@
 
             // Exact match only: compare normalised paths (strip trailing slashes) to
             // handle GA4's trailing-slash variance without risking false positives.
+            // Always write an entry so nodes with a URL but no GA4 traffic show 0.
             const matchedKey = keys.find( k => k === path || k.replace(/\/$/, '') === path );
-            if ( matchedKey ) nodeMet[ node.id ] = { ...metrics[ matchedKey ] };
+            nodeMet[ node.id ] = matchedKey
+                ? { ...metrics[ matchedKey ] }
+                : { sessions: 0, conversions: 0, users: 0, bounce_rate: 0, conversion_rate: 0 };
         });
 
         // Pass 2: recalculate CVR using the predecessor step's sessions.
