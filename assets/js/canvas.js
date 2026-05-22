@@ -57,6 +57,7 @@
         setupCanvasPan();
         setupZoomButtons();
         setupConnectionMode();
+        setupConnectionHover();
         bindInspector();
         bindSaveButton();
         bindClearButton();
@@ -254,15 +255,6 @@
         const g  = document.createElementNS('http://www.w3.org/2000/svg','g');
         g.id     = id;
 
-        // Wide transparent hit area makes hovering easy on the thin curve
-        const hitArea = document.createElementNS('http://www.w3.org/2000/svg','path');
-        hitArea.setAttribute('class', 'fs-conn-hit');
-        hitArea.setAttribute('stroke', 'rgba(0,0,0,0.001)');
-        hitArea.setAttribute('stroke-width', '16');
-        hitArea.setAttribute('fill', 'none');
-        hitArea.style.cursor = 'pointer';
-        hitArea.style.pointerEvents = 'all';
-
         const path = document.createElementNS('http://www.w3.org/2000/svg','path');
         path.setAttribute('class', 'fs-conn-path');
         path.setAttribute('stroke', '#FF6E4E');
@@ -278,51 +270,28 @@
         label.setAttribute('text-anchor', 'middle');
         label.setAttribute('dominant-baseline', 'middle');
 
-        // × delete button — appears at midpoint on hover
-        const delGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
-        delGroup.setAttribute('class', 'fs-conn-del');
-        delGroup.style.display       = 'none';
-        delGroup.style.cursor        = 'pointer';
-        delGroup.style.pointerEvents = 'all';
-
-        const delCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-        delCircle.setAttribute('r', '9');
-        delCircle.setAttribute('fill', '#ef4444');
-        delCircle.setAttribute('stroke', '#fff');
-        delCircle.setAttribute('stroke-width', '1.5');
-
-        const delText = document.createElementNS('http://www.w3.org/2000/svg','text');
-        delText.setAttribute('text-anchor', 'middle');
-        delText.setAttribute('dominant-baseline', 'middle');
-        delText.setAttribute('fill', '#fff');
-        delText.setAttribute('font-size', '14');
-        delText.setAttribute('font-weight', 'bold');
-        delText.textContent = '×';
-
-        delGroup.appendChild(delCircle);
-        delGroup.appendChild(delText);
-
-        g.appendChild(hitArea);
         g.appendChild(path);
         g.appendChild(label);
-        g.appendChild(delGroup);
         svg.appendChild(g);
 
-        g.addEventListener('mouseover', e => {
-            if ( !g.contains(e.relatedTarget) ) delGroup.style.display = '';
-        });
-        g.addEventListener('mouseout', e => {
-            if ( !g.contains(e.relatedTarget) ) delGroup.style.display = 'none';
-        });
+        // HTML delete button — lives in the wrap div, not the SVG, so pointer-events always work
+        const delBtn = document.createElement('button');
+        delBtn.className = 'fs-conn-del-btn';
+        delBtn.setAttribute('aria-label', 'Delete connection');
+        delBtn.textContent = '×';
+        wrap.appendChild(delBtn);
 
-        delGroup.addEventListener('click', e => {
+        const conn = { from: fromId, to: toId, el: g, delBtn };
+
+        delBtn.addEventListener('click', e => {
             e.stopPropagation();
-            state.connections = state.connections.filter( c => ! ( c.from === fromId && c.to === toId ) );
+            state.connections = state.connections.filter( c => c !== conn );
             g.remove();
+            delBtn.remove();
         });
 
-        state.connections.push({ from: fromId, to: toId, el: g });
-        updateConnectionPath({ from: fromId, to: toId, el: g });
+        state.connections.push(conn);
+        updateConnectionPath(conn);
         ensureArrowhead();
     }
 
@@ -359,17 +328,44 @@
         const d   = `M${x1},${y1} C${cx1},${y1} ${cx2},${y2} ${x2},${y2}`;
 
         conn.el.querySelector('.fs-conn-path')?.setAttribute('d', d);
-        conn.el.querySelector('.fs-conn-hit')?.setAttribute('d', d);
 
         const mx  = (x1 + x2) / 2;
         const my  = (y1 + y2) / 2 - 10;
         const lbl = conn.el.querySelector('.fs-conn-label');
         if ( lbl ) { lbl.setAttribute('x', mx); lbl.setAttribute('y', my); }
-        conn.el.querySelector('.fs-conn-del')?.setAttribute('transform', `translate(${mx},${my})`);
+
+        // Keep HTML delete button centred at the connection midpoint in screen space
+        if ( conn.delBtn ) {
+            conn.delBtn.style.left = ( mx * state.zoom + state.pan.x ) + 'px';
+            conn.delBtn.style.top  = ( my * state.zoom + state.pan.y ) + 'px';
+        }
     }
 
     function redrawConnections() {
         state.connections.forEach( conn => updateConnectionPath(conn) );
+    }
+
+    // ── Connection Hover (proximity-based, avoids SVG pointer-events issues) ──
+    function setupConnectionHover() {
+        wrap.addEventListener('mousemove', e => {
+            const rect = wrap.getBoundingClientRect();
+            const sx   = e.clientX - rect.left;
+            const sy   = e.clientY - rect.top;
+
+            state.connections.forEach( conn => {
+                if ( !conn.delBtn ) return;
+                const bx   = parseFloat( conn.delBtn.style.left ) || 0;
+                const by   = parseFloat( conn.delBtn.style.top )  || 0;
+                const dist = Math.sqrt( (sx - bx) * (sx - bx) + (sy - by) * (sy - by) );
+                conn.delBtn.style.display = dist < 24 ? '' : 'none';
+            });
+        });
+
+        wrap.addEventListener('mouseleave', () => {
+            state.connections.forEach( conn => {
+                if ( conn.delBtn ) conn.delBtn.style.display = 'none';
+            });
+        });
     }
 
     // ── Canvas Pan ─────────────────────────────────────────────────────
@@ -428,6 +424,7 @@
         const t = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.zoom})`;
         canvas.style.transform = t;
         svg.style.transform    = t;
+        redrawConnections(); // reposition HTML delete buttons to match new pan/zoom
     }
 
     // ── Zoom ───────────────────────────────────────────────────────────

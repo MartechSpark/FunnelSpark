@@ -210,3 +210,18 @@ html, body.fs-editor-body {
 .fs-promo__cta:hover { background: #e85c3b; color: #fff; }
 .fs-promo__powered { text-align: center; font-size: 10px; color: var(--fs-muted); margin: 0; }
 .fs-promo__powered a { color: var(--fs-orange); text-decoration: none; }
+
+/* ── Connection Delete Button (HTML overlay, always above SVG) ───── */
+.fs-conn-del-btn {
+  position: absolute;
+  display: none;
+  width: 22px; height: 22px;
+  background: #ef4444; color: #fff;
+  border: 2px solid #fff; border-radius: 50%;
+  font-size: 17px; font-weight: bold; line-height: 1;
+  cursor: pointer; z-index: 20;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  pointer-events: all;
+}
+.fs-conn-del-btn:hover { background: #dc2626; transform: translate(-50%, -50%) scale(1.15); }
