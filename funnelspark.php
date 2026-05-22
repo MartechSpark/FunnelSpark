@@ -6,7 +6,7 @@
  * Version:           1.2.7
  * Requires at least: 6.0
  * Requires PHP:      7.4
- * Author:            Paul Neumyer — MarTech Spark
+ * Author:            MarTech Spark
  * Author URI:        https://martechspark.com
  * License:           GPL-2.0+
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
