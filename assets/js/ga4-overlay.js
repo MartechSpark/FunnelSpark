@@ -146,6 +146,9 @@
 
         // Pass 2: recalculate CVR using the predecessor step's sessions.
         // If multiple predecessors exist (merge point), sum their sessions.
+        // For nodes marked as conversion steps, sessions reaching that page
+        // are the conversions — GA4 event-based conversion counts are not used.
+        const nodes = FunnelSparkCanvas?.getNodes?.() || {};
         const predSessionsMap = {};
         connections.forEach( conn => {
             const pred = nodeMet[ conn.from ];
@@ -155,6 +158,8 @@
         });
         Object.entries( predSessionsMap ).forEach( ([ nodeId, predSessions ]) => {
             if ( !nodeMet[ nodeId ] || predSessions <= 0 ) return;
+            const isConv = !! nodes[ nodeId ]?.conversion;
+            if ( isConv ) nodeMet[ nodeId ].conversions = nodeMet[ nodeId ].sessions;
             nodeMet[ nodeId ].conversion_rate = parseFloat(
                 ( ( nodeMet[ nodeId ].conversions / predSessions ) * 100 ).toFixed(1)
             );

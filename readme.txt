@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,9 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.8 =
+* Fix: conversion-step nodes now correctly show sessions as conversions and calculate CVR against the predecessor step's traffic (e.g. 2 sessions / 9 predecessor sessions = 22.2% CVR)
 
 = 1.2.7 =
 * Update: promo JSON cache reduced from 24 hours to 1 hour
