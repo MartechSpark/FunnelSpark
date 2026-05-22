@@ -90,7 +90,7 @@ These requests are made only after you explicitly authorize your Google account 
 
 = MarTech Spark Promo Feed =
 
-FunnelSpark periodically fetches a small JSON file from `https://martechspark.com/funnelspark-promo.json` to display promotional content in the plugin editor sidebar. This request is made only on admin pages and is cached for 1 hour. The request includes the plugin version and your site URL in the HTTP user-agent string (`FunnelSpark/x.x.x`). No personal data or analytics data is transmitted. You can dismiss the promo sidebar at any time.
+FunnelSpark periodically fetches a small JSON file from `https://martechspark.com/funnelspark-promo.json` to display promotional content in the plugin editor sidebar. This request is made only on admin pages and is cached for 1 hour. The request includes the plugin version and your site URL in the HTTP user-agent string (`FunnelSpark/x.x.x`). No personal data or analytics data is transmitted.
 
 * MarTech Spark Privacy Policy: https://martechspark.com/privacy-policy/
 
