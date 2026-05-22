@@ -66,6 +66,25 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
                     <span style="color:#34d399;font-weight:600;">● Connected</span>
                     <button id="fs-disconnect-ga4" class="fs-btn fs-btn--ghost fs-btn--sm">Disconnect</button>
                 </div>
+
+                <div id="fs-property-info" style="margin-top:16px;">
+                    <p id="fs-property-loading" style="font-size:12px;color:var(--fs-muted);">Loading property info…</p>
+                    <div id="fs-property-details" style="display:none;">
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <tr>
+                                <td style="padding:4px 0 4px;color:var(--fs-muted);font-size:11px;width:120px;text-transform:uppercase;letter-spacing:.05em;">Property</td>
+                                <td id="fs-prop-name" style="color:var(--fs-white);font-weight:600;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:4px 0;color:var(--fs-muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Property ID</td>
+                                <td id="fs-prop-id" style="color:var(--fs-muted);font-family:monospace;font-size:12px;"></td>
+                            </tr>
+                        </table>
+                        <div id="fs-prop-streams"></div>
+                    </div>
+                    <p id="fs-property-error" style="display:none;font-size:12px;color:#f87171;margin:8px 0 0;"></p>
+                </div>
+
                 <div id="fs-disconnect-notice" style="margin-top:12px;"></div>
 
             <?php elseif ( $has_creds ) : ?>

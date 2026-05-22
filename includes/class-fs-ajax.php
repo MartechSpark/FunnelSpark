@@ -13,7 +13,8 @@ class FS_Ajax {
         add_action( 'wp_ajax_fs_get_ga4_sources',    [ $this, 'get_ga4_sources' ] );
         add_action( 'wp_ajax_fs_delete_funnel',     [ $this, 'delete_funnel' ] );
         add_action( 'wp_ajax_fs_duplicate_funnel',  [ $this, 'duplicate_funnel' ] );
-        add_action( 'wp_ajax_fs_refresh_promo',     [ $this, 'refresh_promo' ] );
+        add_action( 'wp_ajax_fs_refresh_promo',        [ $this, 'refresh_promo' ] );
+        add_action( 'wp_ajax_fs_get_ga4_property_info', [ $this, 'get_ga4_property_info' ] );
     }
 
     // ── Save Funnel Canvas ─────────────────────────────────────────────
@@ -154,6 +155,7 @@ class FS_Ajax {
 
         FS_Settings::set( [ 'ga4_refresh_token' => '' ] );
         delete_transient( 'fs_ga4_token' );
+        delete_transient( 'fs_ga4_property_info' );
         wp_send_json_success( 'Disconnected.' );
     }
 
@@ -189,6 +191,30 @@ class FS_Ajax {
         update_post_meta( $new_id, '_fs_updated', current_time( 'mysql' ) );
 
         wp_send_json_success( [ 'funnel_id' => $new_id ] );
+    }
+
+    // ── GA4 Property & Stream Info ────────────────────────────────────
+    public function get_ga4_property_info() {
+        check_ajax_referer( 'fs_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+        if ( ! FS_Settings::is_ga4_configured() ) wp_send_json_error( 'GA4 not configured.' );
+
+        $cached = get_transient( 'fs_ga4_property_info' );
+        if ( $cached !== false ) {
+            wp_send_json_success( $cached );
+            return;
+        }
+
+        $client = new FS_GA4_Client();
+        $info   = $client->get_property_info();
+
+        if ( is_wp_error( $info ) ) {
+            wp_send_json_error( $info->get_error_message() );
+            return;
+        }
+
+        set_transient( 'fs_ga4_property_info', $info, DAY_IN_SECONDS );
+        wp_send_json_success( $info );
     }
 
     // ── Refresh Remote Promo ──────────────────────────────────────────

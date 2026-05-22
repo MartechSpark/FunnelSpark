@@ -242,6 +242,55 @@ class FS_GA4_Client {
         return $out;
     }
 
+    // ── Property & Stream Info (Admin API) ───────────────────────────
+
+    public function get_property_info() {
+        $token = $this->get_token();
+        if ( is_wp_error( $token ) ) return $token;
+
+        $admin_base = 'https://analyticsadmin.googleapis.com/v1beta/properties/';
+        $headers    = [ 'Authorization' => 'Bearer ' . $token ];
+
+        $prop_resp = wp_remote_get( $admin_base . $this->property_id, [
+            'headers' => $headers,
+            'timeout' => 10,
+        ]);
+
+        if ( is_wp_error( $prop_resp ) ) return $prop_resp;
+
+        $property = json_decode( wp_remote_retrieve_body( $prop_resp ), true );
+        if ( isset( $property['error'] ) ) {
+            return new WP_Error( 'fs_admin_api', $property['error']['message'] ?? 'Admin API error' );
+        }
+
+        $streams_resp = wp_remote_get( $admin_base . $this->property_id . '/dataStreams', [
+            'headers' => $headers,
+            'timeout' => 10,
+        ]);
+
+        $streams = [];
+        if ( ! is_wp_error( $streams_resp ) ) {
+            $streams_data = json_decode( wp_remote_retrieve_body( $streams_resp ), true );
+            foreach ( $streams_data['dataStreams'] ?? [] as $stream ) {
+                $info = [
+                    'name' => $stream['displayName'] ?? '',
+                    'type' => $stream['type']        ?? '',
+                ];
+                if ( ! empty( $stream['webStreamData'] ) ) {
+                    $info['measurement_id'] = $stream['webStreamData']['measurementId'] ?? '';
+                    $info['uri']            = $stream['webStreamData']['defaultUri']    ?? '';
+                }
+                $streams[] = $info;
+            }
+        }
+
+        return [
+            'property_id'   => $this->property_id,
+            'property_name' => $property['displayName'] ?? '',
+            'streams'       => $streams,
+        ];
+    }
+
     public function clear_cache() {
         global $wpdb;
         $wpdb->query(

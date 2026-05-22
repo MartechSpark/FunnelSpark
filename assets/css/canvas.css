@@ -93,8 +93,9 @@ html, body.fs-editor-body {
   position: absolute; top: 0; left: 0;
   width: 3000px; height: 3000px; pointer-events: none;
   transform-origin: 0 0; overflow: visible;
+  z-index: 2;
 }
-.fs-connections-svg g { pointer-events: stroke; cursor: pointer; }
+.fs-connections-svg g { pointer-events: none; cursor: pointer; }
 
 /* ── Empty Canvas Hint ───────────────────────────────────────── */
 .fs-canvas-empty {
