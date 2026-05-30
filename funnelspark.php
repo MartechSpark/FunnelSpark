@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       FunnelSpark
- * Plugin URI:        https://martechspark.com
+ * Plugin URI:        https://github.com/MartechSpark/FunnelSpark
  * Description:       Visual sales funnel builder with live GA4 conversion tracking. Build, visualize, and optimize your marketing funnels — right inside WordPress.
  * Version:           1.2.10
  * Requires at least: 6.0
