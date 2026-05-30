@@ -1,8 +1,8 @@
-=== FunnelSpark — Visual Funnel Builder & GA4 Tracker ===
+=== FunnelSpark ===
 Contributors: paulneumyer
 Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, funnel visualization, analytics
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 1.2.10
 License: GPLv2 or later
