@@ -1,4 +1,4 @@
-=== FunnelSpark ===
+=== FunnelSpark — Visual Funnel Builder & GA4 Tracker ===
 Contributors: paulneumyer
 Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, funnel visualization, analytics
 Requires at least: 6.0
