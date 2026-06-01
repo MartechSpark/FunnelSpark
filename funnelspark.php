@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       FunnelSpark
+ * Plugin Name:       MarTech Spark Conversion Funnel Mapper
  * Plugin URI:        https://github.com/MartechSpark/FunnelSpark
  * Description:       Visual sales funnel builder with live GA4 conversion tracking. Build, visualize, and optimize your marketing funnels — right inside WordPress.
  * Version:           1.2.10
@@ -10,7 +10,7 @@
  * Author URI:        https://martechspark.com
  * License:           GPL-2.0+
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       funnelspark
+ * Text Domain:       martech-spark-conversion-funnel-mapper
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
