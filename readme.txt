@@ -1,4 +1,4 @@
-=== FunnelSpark — Visual Funnel Builder & GA4 Tracker ===
+=== MarTech Spark Conversion Funnel Mapper ===
 Contributors: paulneumyer
 Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, funnel visualization, analytics
 Requires at least: 6.0
