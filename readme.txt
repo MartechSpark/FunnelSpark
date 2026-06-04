@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.11
+Stable tag: 1.2.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -100,6 +100,9 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.12 =
+* Fix: replace remaining "FunnelSpark" display strings in dashboard, editor, and settings templates with "Funnel Mapper"
 
 = 1.2.11 =
 * Rename plugin to MarTech Spark Conversion Funnel Mapper; update slug/text domain
