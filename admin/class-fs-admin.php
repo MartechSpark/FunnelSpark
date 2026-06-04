@@ -7,7 +7,6 @@ class FS_Admin {
         add_action( 'admin_menu',            [ $this, 'register_menu' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_action( 'admin_init',            [ $this, 'handle_oauth_callback' ] );
-        add_action( 'admin_head',            [ $this, 'hide_editor_submenu' ] );
     }
 
     public function register_menu() {
@@ -16,13 +15,13 @@ class FS_Admin {
         );
 
         add_menu_page(
-            'FunnelSpark',
-            'FunnelSpark',
+            'Funnel Mapper',
+            'Funnel Mapper',
             'edit_posts',
             'funnelspark',
             [ $this, 'render_dashboard' ],
             $icon,
-            4
+            58
         );
 
         add_submenu_page( 'funnelspark', 'My Funnels',  'My Funnels',  'edit_posts',      'funnelspark',          [ $this, 'render_dashboard' ] );
@@ -35,6 +34,8 @@ class FS_Admin {
     }
 
     public function enqueue_assets( $hook ) {
+        wp_add_inline_style( 'common', '#adminmenu a[href="admin.php?page=funnelspark-editor"]{display:none!important}' );
+
         $fs_pages = [ 'toplevel_page_funnelspark', 'funnelspark_page_funnelspark-new', 'funnelspark_page_funnelspark-editor', 'funnelspark_page_funnelspark-settings' ];
         if ( ! in_array( $hook, $fs_pages, true ) ) return;
 
@@ -116,11 +117,6 @@ class FS_Admin {
 
         wp_redirect( add_query_arg( 'fs_ga4_status', 'connected', $settings_url ) );
         exit;
-    }
-
-    // ── Hide Editor Submenu Link ──────────────────────────────────────
-    public function hide_editor_submenu() {
-        echo '<style>#adminmenu a[href="admin.php?page=funnelspark-editor"]{display:none!important}</style>';
     }
 
     // ── Page Renderers ────────────────────────────────────────────────

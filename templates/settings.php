@@ -11,7 +11,7 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
         <div class="fs-header__brand">
             <span class="fs-spark">⚡</span>
             <div>
-                <h1 class="fs-header__title">FunnelSpark Settings</h1>
+                <h1 class="fs-header__title">Funnel Mapper Settings</h1>
                 <p class="fs-header__sub">Connect your GA4 property for live conversion data</p>
             </div>
         </div>
@@ -27,7 +27,7 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
 
         <?php if ( isset( $_GET['fs_ga4_error'] ) ) : ?>
             <div class="fs-notice fs-notice--error" style="max-width:680px;margin-bottom:16px;">
-                Connection failed: <?php echo esc_html( urldecode( $_GET['fs_ga4_error'] ) ); ?>
+                Connection failed: <?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['fs_ga4_error'] ) ) ); ?>
             </div>
         <?php endif; ?>
 

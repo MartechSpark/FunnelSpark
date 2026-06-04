@@ -1,10 +1,10 @@
 === MarTech Spark Conversion Funnel Mapper ===
-Contributors: paulneumyer
+Contributors: paulneumyer, martechspark
 Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, funnel visualization, analytics
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.10
+Stable tag: 1.2.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,11 +12,11 @@ Build, visualize, and track your marketing funnels with live GA4 conversion data
 
 == Description ==
 
-**FunnelSpark** is the only WordPress plugin that lets you visually map your sales funnel AND overlay real GA4 conversion data on every step — so you can see exactly where leads are dropping off.
+**MarTech Spark Conversion Funnel Mapper** lets you visually map your sales funnel and overlay real GA4 conversion data on every step — so you can see exactly where leads are dropping off.
 
 No more guessing. No more switching between tools. Your funnel. Your data. One screen.
 
-= What FunnelSpark Does =
+= What This Plugin Does =
 
 * **Visual Funnel Builder** — drag-and-drop funnel steps (opt-in pages, sales pages, upsells, thank-you pages) onto an intuitive canvas. Connect them with directional arrows to map your customer journey.
 * **Live GA4 Data Overlay** — connect your GA4 property and see real sessions, conversion rates, and drop-off percentages on each funnel step automatically.
@@ -32,9 +32,7 @@ No more guessing. No more switching between tools. Your funnel. Your data. One s
 
 = Built By MarTech Spark =
 
-FunnelSpark is built and maintained by [MarTech Spark](https://martechspark.com) — a fractional marketing consultancy helping small businesses build smarter marketing systems.
-
-**Struggling with a leaky funnel?** Get a [Seven-Point Website Lead Audit](https://martechspark.com/lp/homepage-audit/) for just $27 — includes a personal video walkthrough of your site with specific fixes.
+This plugin is built and maintained by [MarTech Spark](https://martechspark.com) — a fractional marketing consultancy helping small businesses build smarter marketing systems.
 
 == Installation ==
 
@@ -59,8 +57,8 @@ FunnelSpark is built and maintained by [MarTech Spark](https://martechspark.com)
 = Does this work without GA4? =
 Yes. You can use the visual funnel builder without GA4. Live data overlay requires a GA4 connection.
 
-= Does FunnelSpark slow down my site? =
-No. FunnelSpark is admin-only. It adds zero code to your public-facing site.
+= Does this plugin slow down my site? =
+No. The plugin is admin-only. It adds zero code to your public-facing site.
 
 = Is my GA4 data stored on your servers? =
 Never. All GA4 data is fetched directly from Google's API to your WordPress site. MarTech Spark does not store or access your analytics data.
@@ -102,6 +100,15 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.11 =
+* Rename plugin to MarTech Spark Conversion Funnel Mapper; update slug/text domain
+* Fix: replace inline <style> echo with wp_add_inline_style() for editor submenu hiding
+* Fix: sanitize canvas_data POST input and restrict canvas JSON to known keys/fields
+* Fix: sanitize $_GET['fs_ga4_error'] before output in settings template
+* Fix: lower admin menu position from 4 to 58
+* readme: remove unsupported "the only" promotional claim and upsell link
+* readme: add martechspark to Contributors list
 
 = 1.2.10 =
 * Fix: funnel steps with a URL configured but zero GA4 sessions now show a "0 Sessions" badge instead of no badge

@@ -24,26 +24,40 @@ class FS_Ajax {
 
         $funnel_id = (int) ( $_POST['funnel_id'] ?? 0 );
         $title     = sanitize_text_field( $_POST['title'] ?? 'Untitled Funnel' );
-        $canvas    = $_POST['canvas_data'] ?? '';
+        $canvas    = sanitize_text_field( wp_unslash( $_POST['canvas_data'] ?? '' ) );
 
         // Validate JSON structure
-        $decoded = json_decode( wp_unslash( $canvas ), true );
-        if ( json_last_error() !== JSON_ERROR_NONE ) {
+        $decoded = json_decode( $canvas, true );
+        if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $decoded ) ) {
             wp_send_json_error( 'Invalid canvas data.' );
         }
+
+        // Allow only known top-level keys
+        $decoded = array_intersect_key( $decoded, array_flip( [ 'nodes', 'connections' ] ) );
 
         // Sanitize each node's data
         if ( ! empty( $decoded['nodes'] ) ) {
             foreach ( $decoded['nodes'] as &$node ) {
+                $node = array_intersect_key( $node, array_flip( [ 'id', 'label', 'url', 'source', 'notes', 'type', 'conversion', 'x', 'y' ] ) );
                 $node['label']      = sanitize_text_field( $node['label']      ?? '' );
-                $node['url']        = esc_url_raw( $node['url']            ?? '' );
+                $node['url']        = esc_url_raw( $node['url']                ?? '' );
                 $node['source']     = sanitize_text_field( $node['source']     ?? '' );
                 $node['notes']      = sanitize_text_field( $node['notes']      ?? '' );
-                $node['type']       = sanitize_key( $node['type']          ?? 'page' );
+                $node['type']       = sanitize_key( $node['type']              ?? 'page' );
                 $node['conversion'] = ! empty( $node['conversion'] );
                 $node['x']          = (float) ( $node['x'] ?? 0 );
                 $node['y']          = (float) ( $node['y'] ?? 0 );
-                $node['id']         = sanitize_key( $node['id']            ?? '' );
+                $node['id']         = sanitize_key( $node['id']                ?? '' );
+            }
+        }
+
+        // Sanitize each connection
+        if ( ! empty( $decoded['connections'] ) ) {
+            foreach ( $decoded['connections'] as &$conn ) {
+                $conn = array_intersect_key( $conn, array_flip( [ 'id', 'from', 'to' ] ) );
+                $conn['id']   = sanitize_key( $conn['id']   ?? '' );
+                $conn['from'] = sanitize_key( $conn['from'] ?? '' );
+                $conn['to']   = sanitize_key( $conn['to']   ?? '' );
             }
         }
 
