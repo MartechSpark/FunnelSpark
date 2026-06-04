@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.10
+Stable tag: 1.2.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -100,6 +100,15 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.11 =
+* Rename plugin to MarTech Spark Conversion Funnel Mapper; update slug/text domain
+* Fix: replace inline <style> echo with wp_add_inline_style() for editor submenu hiding
+* Fix: sanitize canvas_data POST input and restrict canvas JSON to known keys/fields
+* Fix: sanitize $_GET['fs_ga4_error'] before output in settings template
+* Fix: lower admin menu position from 4 to 58
+* readme: remove unsupported "the only" promotional claim and upsell link
+* readme: add martechspark to Contributors list
 
 = 1.2.10 =
 * Fix: funnel steps with a URL configured but zero GA4 sessions now show a "0 Sessions" badge instead of no badge
