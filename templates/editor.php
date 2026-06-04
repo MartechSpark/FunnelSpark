@@ -10,7 +10,7 @@ $promo_shown  = ! get_user_meta( get_current_user_id(), 'fs_promo_dismissed', tr
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?php echo esc_html( $funnel_title ); ?> — FunnelSpark</title>
+<title><?php echo esc_html( $funnel_title ); ?> — Martech Spark</title>
 <?php
 wp_enqueue_style( 'fs-fonts' );
 wp_enqueue_style( 'fs-admin' );
