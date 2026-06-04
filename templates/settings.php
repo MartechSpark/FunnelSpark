@@ -88,7 +88,7 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
                 <div id="fs-disconnect-notice" style="margin-top:12px;"></div>
 
             <?php elseif ( $has_creds ) : ?>
-                <p class="fs-hint" style="margin-bottom:14px;">Credentials saved. Authorize FunnelSpark to read your GA4 data.</p>
+                <p class="fs-hint" style="margin-bottom:14px;">Credentials saved. Authorize Martech Spark to read your GA4 data.</p>
                 <a href="<?php echo esc_url( $auth_url ); ?>" class="fs-btn fs-btn--primary">Connect Google Analytics</a>
 
             <?php else : ?>
