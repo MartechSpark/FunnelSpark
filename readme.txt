@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.12
+Stable tag: 1.2.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -100,6 +100,9 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.2.13 =
+* Fix: remove sanitize_text_field() from raw canvas JSON — it strips HTML-like content and can corrupt node data; sanitization happens correctly after json_decode
 
 = 1.2.12 =
 * Fix: replace remaining "FunnelSpark" display strings in dashboard, editor, and settings templates with "Funnel Mapper"
