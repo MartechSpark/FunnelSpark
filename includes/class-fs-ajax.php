@@ -24,7 +24,7 @@ class FS_Ajax {
 
         $funnel_id = (int) ( $_POST['funnel_id'] ?? 0 );
         $title     = sanitize_text_field( $_POST['title'] ?? 'Untitled Funnel' );
-        $canvas    = wp_unslash( $_POST['canvas_data'] ?? '' );
+        $canvas    = sanitize_text_field( wp_unslash( $_POST['canvas_data'] ?? '' ) );
 
         // Validate JSON structure
         $decoded = json_decode( $canvas, true );
