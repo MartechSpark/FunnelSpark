@@ -10,7 +10,7 @@ $promo_shown  = ! get_user_meta( get_current_user_id(), 'fs_promo_dismissed', tr
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?php echo esc_html( $funnel_title ); ?> — Martech Spark</title>
+<title><?php echo esc_html( $funnel_title ); ?> — Funnel Mapper</title>
 <?php
 wp_enqueue_style( 'fs-fonts' );
 wp_enqueue_style( 'fs-admin' );
@@ -28,7 +28,7 @@ wp_print_styles();
         <input type="text" id="fs-funnel-title" class="fs-title-input" value="<?php echo esc_attr( $funnel_title ); ?>" placeholder="Funnel Name">
     </div>
     <div class="fs-editor-topbar__center">
-        <span class="fs-spark-wordmark">⚡ FunnelSpark</span>
+        <span class="fs-spark-wordmark">⚡ Funnel Mapper</span>
     </div>
     <div class="fs-editor-topbar__right">
         <select id="fs-date-range" class="fs-select fs-select--sm">

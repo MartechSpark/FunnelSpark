@@ -14,7 +14,7 @@ $funnels = get_posts([
         <div class="fs-header__brand">
             <span class="fs-spark">⚡</span>
             <div>
-                <h1 class="fs-header__title">Martech Spark</h1>
+                <h1 class="fs-header__title">Funnel Mapper</h1>
                 <p class="fs-header__sub">Visual Funnel Builder &amp; GA4 Tracker</p>
             </div>
         </div>
