@@ -1,9 +1,9 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit;
 
-$funnel_id    = (int) ( $_GET['funnel_id'] ?? 0 );
+$funnel_id    = absint( $_GET['funnel_id'] ?? 0 );
 $funnel_title = $funnel_id ? get_the_title( $funnel_id ) : 'Untitled Funnel';
 $is_new       = ! $funnel_id;
-$promo_shown  = ! get_user_meta( get_current_user_id(), 'fs_promo_dismissed', true );
+$promo_shown  = ! get_user_meta( get_current_user_id(), 'funnelspark_promo_dismissed', true );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -12,9 +12,9 @@ $promo_shown  = ! get_user_meta( get_current_user_id(), 'fs_promo_dismissed', tr
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?php echo esc_html( $funnel_title ); ?> — Martech Spark</title>
 <?php
-wp_enqueue_style( 'fs-fonts' );
-wp_enqueue_style( 'fs-admin' );
-wp_enqueue_style( 'fs-canvas' );
+wp_enqueue_style( 'funnelspark-fonts' );
+wp_enqueue_style( 'funnelspark-admin' );
+wp_enqueue_style( 'funnelspark-canvas' );
 wp_print_styles();
 ?>
 </head>
@@ -28,7 +28,7 @@ wp_print_styles();
         <input type="text" id="fs-funnel-title" class="fs-title-input" value="<?php echo esc_attr( $funnel_title ); ?>" placeholder="Funnel Name">
     </div>
     <div class="fs-editor-topbar__center">
-        <span class="fs-spark-wordmark">⚡ FunnelSpark</span>
+        <span class="fs-spark-wordmark">⚡ Funnel Mapper</span>
     </div>
     <div class="fs-editor-topbar__right">
         <select id="fs-date-range" class="fs-select fs-select--sm">
@@ -37,7 +37,7 @@ wp_print_styles();
             <option value="90daysAgo">Last 90 Days</option>
         </select>
         <span id="fs-date-label" class="fs-date-label"></span>
-        <button id="fs-load-ga4" class="fs-btn fs-btn--ghost fs-btn--sm" <?php echo ! FS_Settings::is_ga4_configured() ? 'disabled title="Configure GA4 in Settings"' : ''; ?>>
+        <button id="fs-load-ga4" class="fs-btn fs-btn--ghost fs-btn--sm" <?php echo ! FunnelSpark_Settings::is_ga4_configured() ? 'disabled title="Configure GA4 in Settings"' : ''; ?>>
             📊 Load GA4 Data
         </button>
         <button id="fs-save-btn" class="fs-btn fs-btn--primary fs-btn--sm">Save</button>
@@ -179,7 +179,7 @@ wp_print_styles();
         </div>
 
         <!-- Promo Sidebar -->
-        <?php $promo = FS_Promo::get(); ?>
+        <?php $promo = FunnelSpark_Promo::get(); ?>
         <div class="fs-promo" id="fs-promo">
             <div class="fs-promo__badge"><?php echo esc_html( $promo['badge'] ); ?></div>
             <div class="fs-promo__icon"><?php echo esc_html( $promo['icon'] ); ?></div>

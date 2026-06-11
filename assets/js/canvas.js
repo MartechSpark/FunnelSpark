@@ -1,6 +1,6 @@
-/* global FS */
+/* global FunnelSparkData */
 /**
- * FunnelSpark Canvas Engine
+ * Funnel Mapper Canvas Engine
  * DOM-based drag-drop funnel builder with SVG arrow connections.
  * No external dependencies — vanilla JS only.
  */
@@ -64,7 +64,7 @@
         buildPageDropdown();
 
         // Load existing canvas data
-        loadCanvasData( window.FS?.canvas_data );
+        loadCanvasData( window.FunnelSparkData?.canvas_data );
     }
 
     // ── Load Saved Canvas ──────────────────────────────────────────────
@@ -80,7 +80,7 @@
             }
             updateEmptyHint();
         } catch(e) {
-            console.warn( 'FunnelSpark: Could not parse canvas data.', e );
+            console.warn( 'Funnel Mapper: Could not parse canvas data.', e );
         }
     }
 
@@ -557,7 +557,7 @@
         const sel = document.getElementById('fs-page-picker');
         if ( !sel ) return;
 
-        const pages = window.FS?.pages;
+        const pages = window.FunnelSparkData?.pages;
         if ( !pages || !pages.length ) {
             sel.closest('.fs-field').style.display = 'none';
             return;
@@ -591,12 +591,12 @@
         sel.innerHTML = '<option value="">Loading paid sources…</option>';
         if ( hint ) hint.textContent = '';
 
-        fetch( FS.ajax_url, {
+        fetch( FunnelSparkData.ajax_url, {
             method:  'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body:    new URLSearchParams({
-                action:     'fs_get_ga4_sources',
-                nonce:      FS.nonce,
+                action:     'funnelspark_get_ga4_sources',
+                nonce:      FunnelSparkData.nonce,
                 date_range: document.getElementById('fs-date-range')?.value || '30daysAgo',
             }),
         })
@@ -766,13 +766,13 @@
         setStatus('Saving…', '');
         document.getElementById('fs-save-btn').disabled = true;
 
-        fetch( FS.ajax_url, {
+        fetch( FunnelSparkData.ajax_url, {
             method:  'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body:    new URLSearchParams({
-                action:      'fs_save_funnel',
-                nonce:       FS.nonce,
-                funnel_id:   FS.funnel_id || 0,
+                action:      'funnelspark_save_funnel',
+                nonce:       FunnelSparkData.nonce,
+                funnel_id:   FunnelSparkData.funnel_id || 0,
                 title,
                 canvas_data: JSON.stringify(data),
             }),
@@ -780,7 +780,7 @@
         .then( r => r.json() )
         .then( resp => {
             if ( resp.success ) {
-                FS.funnel_id = resp.data.funnel_id;
+                FunnelSparkData.funnel_id = resp.data.funnel_id;
                 // Update URL without reload
                 const url = new URL(window.location.href);
                 url.searchParams.set('page', 'funnelspark-editor');

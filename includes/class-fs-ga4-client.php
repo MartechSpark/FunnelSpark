@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-class FS_GA4_Client {
+class FunnelSpark_GA4_Client {
 
     const TOKEN_URL  = 'https://oauth2.googleapis.com/token';
     const REVOKE_URL = 'https://oauth2.googleapis.com/revoke';
@@ -15,10 +15,10 @@ class FS_GA4_Client {
     private $refresh_token;
 
     public function __construct() {
-        $this->property_id   = FS_Settings::get( 'ga4_property_id' );
-        $this->client_id     = FS_Settings::get( 'ga4_client_id' );
-        $this->client_secret = FS_Settings::get( 'ga4_client_secret' );
-        $this->refresh_token = FS_Settings::get( 'ga4_refresh_token' );
+        $this->property_id   = FunnelSpark_Settings::get( 'ga4_property_id' );
+        $this->client_id     = FunnelSpark_Settings::get( 'ga4_client_id' );
+        $this->client_secret = FunnelSpark_Settings::get( 'ga4_client_secret' );
+        $this->refresh_token = FunnelSpark_Settings::get( 'ga4_refresh_token' );
     }
 
     // ── OAuth Helpers (static) ────────────────────────────────────────
@@ -29,10 +29,10 @@ class FS_GA4_Client {
 
     public static function get_auth_url() {
         $state = wp_generate_password( 24, false );
-        set_transient( 'fs_oauth_state', $state, 600 );
+        set_transient( 'funnelspark_oauth_state', $state, 600 );
 
         return add_query_arg([
-            'client_id'     => FS_Settings::get( 'ga4_client_id' ),
+            'client_id'     => FunnelSpark_Settings::get( 'ga4_client_id' ),
             'redirect_uri'  => self::get_redirect_uri(),
             'response_type' => 'code',
             'scope'         => self::SCOPE,
@@ -47,8 +47,8 @@ class FS_GA4_Client {
             'body' => [
                 'grant_type'    => 'authorization_code',
                 'code'          => $code,
-                'client_id'     => FS_Settings::get( 'ga4_client_id' ),
-                'client_secret' => FS_Settings::get( 'ga4_client_secret' ),
+                'client_id'     => FunnelSpark_Settings::get( 'ga4_client_id' ),
+                'client_secret' => FunnelSpark_Settings::get( 'ga4_client_secret' ),
                 'redirect_uri'  => self::get_redirect_uri(),
             ],
             'timeout' => 15,
@@ -59,7 +59,7 @@ class FS_GA4_Client {
         $body = json_decode( wp_remote_retrieve_body( $resp ), true );
         if ( empty( $body['refresh_token'] ) ) {
             $detail = $body['error_description'] ?? $body['error'] ?? 'Unknown error';
-            return new WP_Error( 'fs_oauth', 'No refresh token received: ' . $detail );
+            return new WP_Error( 'funnelspark_oauth', 'No refresh token received: ' . $detail );
         }
 
         return $body['refresh_token'];
@@ -75,7 +75,7 @@ class FS_GA4_Client {
     // ── Access Token ──────────────────────────────────────────────────
 
     private function get_token() {
-        $cached = get_transient( 'fs_ga4_token' );
+        $cached = get_transient( 'funnelspark_ga4_token' );
         if ( $cached ) return $cached;
 
         $resp = wp_remote_post( self::TOKEN_URL, [
@@ -93,11 +93,11 @@ class FS_GA4_Client {
         $body = json_decode( wp_remote_retrieve_body( $resp ), true );
         if ( empty( $body['access_token'] ) ) {
             $detail = $body['error_description'] ?? $body['error'] ?? 'Unknown error';
-            return new WP_Error( 'fs_token', 'Could not retrieve GA4 access token: ' . $detail );
+            return new WP_Error( 'funnelspark_token', 'Could not retrieve GA4 access token: ' . $detail );
         }
 
         $ttl = max( 60, (int) ( $body['expires_in'] ?? 3600 ) - 60 );
-        set_transient( 'fs_ga4_token', $body['access_token'], $ttl );
+        set_transient( 'funnelspark_ga4_token', $body['access_token'], $ttl );
         return $body['access_token'];
     }
 
@@ -118,14 +118,14 @@ class FS_GA4_Client {
 
         if ( is_wp_error( $resp ) ) return $resp;
         $data = json_decode( wp_remote_retrieve_body( $resp ), true );
-        if ( isset( $data['error'] ) ) return new WP_Error( 'fs_api', $data['error']['message'] );
+        if ( isset( $data['error'] ) ) return new WP_Error( 'funnelspark_api', $data['error']['message'] );
         return $data;
     }
 
     // ── Public Methods ────────────────────────────────────────────────
 
     public function get_traffic_sources( $date_range = '30daysAgo' ) {
-        $cache_key = 'fs_ga4_srcs_v2_' . md5( $date_range );
+        $cache_key = 'funnelspark_ga4_srcs_v2_' . md5( $date_range );
         $cached    = get_transient( $cache_key );
         if ( $cached !== false ) return $cached;
 
@@ -188,7 +188,7 @@ class FS_GA4_Client {
     }
 
     public function get_page_metrics( array $page_paths, $date_range = '30daysAgo' ) {
-        $cache_key = 'fs_sess_' . md5( implode( ',', $page_paths ) . $date_range );
+        $cache_key = 'funnelspark_sess_' . md5( implode( ',', $page_paths ) . $date_range );
         $cached    = get_transient( $cache_key );
         if ( $cached ) return $cached;
 
@@ -266,7 +266,7 @@ class FS_GA4_Client {
 
         $property = json_decode( wp_remote_retrieve_body( $prop_resp ), true );
         if ( isset( $property['error'] ) ) {
-            return new WP_Error( 'fs_admin_api', $property['error']['message'] ?? 'Admin API error' );
+            return new WP_Error( 'funnelspark_admin_api', $property['error']['message'] ?? 'Admin API error' );
         }
 
         $streams_resp = wp_remote_get( $admin_base . $this->property_id . '/dataStreams', [
@@ -301,8 +301,8 @@ class FS_GA4_Client {
         global $wpdb;
         $wpdb->query(
             "DELETE FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_fs_%'
-             OR option_name LIKE '_transient_timeout_fs_%'"
+             WHERE option_name LIKE '_transient_funnelspark_%'
+             OR option_name LIKE '_transient_timeout_funnelspark_%'"
         );
     }
 }

@@ -1,7 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-class FS_Settings {
+class FunnelSpark_Settings {
 
     const OPTION_KEY = 'funnelspark_settings';
 

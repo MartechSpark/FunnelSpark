@@ -1,6 +1,6 @@
-/* global FS, FunnelSparkCanvas */
+/* global FunnelSparkData, FunnelSparkCanvas */
 /**
- * FunnelSpark GA4 Overlay
+ * Funnel Mapper GA4 Overlay
  * Fetches live GA4 metrics per page path and injects data badges
  * onto matching funnel step nodes on the canvas.
  */
@@ -22,7 +22,7 @@
         });
 
         // Auto-load on canvas open
-        if ( window.FS?.ga4_configured ) {
+        if ( window.FunnelSparkData?.ga4_configured ) {
             loadGA4Data( true );
         }
     }
@@ -44,8 +44,8 @@
     }
 
     function loadGA4Data( silent ) {
-        if ( ! window.FS?.ga4_configured ) {
-            if ( !silent ) alert('Please configure GA4 in FunnelSpark → Settings first.');
+        if ( ! window.FunnelSparkData?.ga4_configured ) {
+            if ( !silent ) alert('Please configure GA4 in Funnel Mapper → Settings first.');
             return;
         }
 
@@ -70,12 +70,12 @@
         // ── Page metrics ──────────────────────────────────────────────
         if ( paths.length > 0 ) {
             requests.push(
-                fetch( FS.ajax_url, {
+                fetch( FunnelSparkData.ajax_url, {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body:    new URLSearchParams({
-                        action:     'fs_get_ga4_overlay',
-                        nonce:      FS.nonce,
+                        action:     'funnelspark_get_ga4_overlay',
+                        nonce:      FunnelSparkData.nonce,
                         date_range: dateRange,
                         ...buildPathsParam(paths),
                     }),
@@ -97,12 +97,12 @@
         // ── Traffic source metrics ────────────────────────────────────
         if ( adNodes.length > 0 ) {
             requests.push(
-                fetch( FS.ajax_url, {
+                fetch( FunnelSparkData.ajax_url, {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body:    new URLSearchParams({
-                        action:     'fs_get_ga4_sources',
-                        nonce:      FS.nonce,
+                        action:     'funnelspark_get_ga4_sources',
+                        nonce:      FunnelSparkData.nonce,
                         date_range: dateRange,
                     }),
                 })

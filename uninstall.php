@@ -17,7 +17,7 @@ delete_option( 'funnelspark_settings' );
 delete_option( 'funnelspark_version' );
 
 $funnels = get_posts([
-    'post_type'      => 'fs_funnel',
+    'post_type'      => 'funnelspark_funnel',
     'posts_per_page' => -1,
     'post_status'    => 'any',
     'fields'         => 'ids',
@@ -30,10 +30,10 @@ foreach ( $funnels as $id ) {
 global $wpdb;
 $wpdb->query(
     "DELETE FROM {$wpdb->options}
-     WHERE option_name LIKE '_transient_fs_%'
-     OR option_name LIKE '_transient_timeout_fs_%'"
+     WHERE option_name LIKE '_transient_funnelspark_%'
+     OR option_name LIKE '_transient_timeout_funnelspark_%'"
 );
 
 $wpdb->query(
-    "DELETE FROM {$wpdb->usermeta} WHERE meta_key = 'fs_promo_dismissed'"
+    "DELETE FROM {$wpdb->usermeta} WHERE meta_key = 'funnelspark_promo_dismissed'"
 );
