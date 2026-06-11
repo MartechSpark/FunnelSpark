@@ -13,7 +13,6 @@ class FunnelSpark_Ajax {
         add_action( 'wp_ajax_funnelspark_get_ga4_sources',    [ $this, 'get_ga4_sources' ] );
         add_action( 'wp_ajax_funnelspark_delete_funnel',     [ $this, 'delete_funnel' ] );
         add_action( 'wp_ajax_funnelspark_duplicate_funnel',  [ $this, 'duplicate_funnel' ] );
-        add_action( 'wp_ajax_funnelspark_refresh_promo',        [ $this, 'refresh_promo' ] );
         add_action( 'wp_ajax_funnelspark_get_ga4_property_info', [ $this, 'get_ga4_property_info' ] );
     }
 
@@ -241,19 +240,5 @@ class FunnelSpark_Ajax {
 
         set_transient( 'funnelspark_ga4_property_info', $info, DAY_IN_SECONDS );
         wp_send_json_success( $info );
-    }
-
-    // ── Refresh Remote Promo ──────────────────────────────────────────
-    public function refresh_promo() {
-        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
-        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
-
-        FunnelSpark_Promo::clear_cache();
-        $promo = FunnelSpark_Promo::fetch_and_cache();
-
-        wp_send_json_success( [
-            'promo'  => $promo,
-            'status' => FunnelSpark_Promo::cache_status(),
-        ]);
     }
 }

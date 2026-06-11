@@ -3,7 +3,7 @@
  * Plugin Name:       MarTech Spark Conversion Funnel Mapper
  * Plugin URI:        https://github.com/MartechSpark/FunnelSpark
  * Description:       Visual sales funnel builder with live GA4 conversion tracking. Build, visualize, and optimize your marketing funnels — right inside WordPress.
- * Version:           1.3.2
+ * Version:           1.3.3
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            MarTech Spark
@@ -15,7 +15,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'FUNNELSPARK_VERSION',    '1.3.2' );
+define( 'FUNNELSPARK_VERSION',    '1.3.3' );
 define( 'FUNNELSPARK_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FUNNELSPARK_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FUNNELSPARK_PLUGIN_FILE', __FILE__ );
@@ -59,6 +59,9 @@ function funnelspark_maybe_migrate() {
 
     // User meta key
     $wpdb->update( $wpdb->usermeta, [ 'meta_key' => 'funnelspark_promo_dismissed' ], [ 'meta_key' => 'fs_promo_dismissed' ] );
+
+    // Drop the cached remote promo from versions that fetched it externally
+    delete_transient( 'funnelspark_remote_promo' );
 
     // Drop old short-prefix transients (they will simply be re-fetched)
     $wpdb->query(

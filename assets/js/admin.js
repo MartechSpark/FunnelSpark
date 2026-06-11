@@ -159,51 +159,6 @@
             });
         });
 
-        // ── Promo Refresh ──────────────────────────────────────────────
-        $('#fs-refresh-promo').on('click', function() {
-            const $btn    = $(this);
-            const $notice = $('#fs-promo-notice');
-
-            $btn.text('Fetching…').prop('disabled', true);
-            $notice.html('');
-
-            $.post(FunnelSparkData.ajax_url, {
-                action: 'funnelspark_refresh_promo',
-                nonce:  FunnelSparkData.nonce,
-            })
-            .done(function(resp) {
-                if ( resp.success ) {
-                    $notice.html('<div class="fs-notice fs-notice--success">✅ Promo refreshed from server. ' + esc(resp.data.status.label) + '</div>');
-                    renderPromoPreview( resp.data.promo );
-                } else {
-                    $notice.html('<div class="fs-notice fs-notice--error">❌ Could not fetch promo JSON. Fallback defaults are active. Check that <code>martechspark.com/funnelspark-promo.json</code> is reachable.</div>');
-                }
-            })
-            .fail(function() {
-                $notice.html('<div class="fs-notice fs-notice--error">❌ Network error.</div>');
-            })
-            .always(function() {
-                $btn.text('↻ Refresh Now').prop('disabled', false);
-            });
-        });
-
-        function renderPromoPreview( promo ) {
-            $('#fs-promo-preview-badge').text( promo.badge  || '' );
-            $('#fs-promo-preview-icon').text(  promo.icon   || '' );
-            $('#fs-promo-preview-head').text(  promo.headline || '' );
-            $('#fs-promo-preview-body').text(  promo.body   || '' );
-            $('#fs-promo-preview-cta').text(   promo.cta_text || '' );
-            $('#fs-promo-preview-pow').text(   promo.powered_by_text || '' );
-
-            const $ul = $('#fs-promo-preview-bullets').empty();
-            if ( promo.bullets && promo.bullets.length ) {
-                promo.bullets.forEach(function(b) {
-                    $ul.append( $('<li>').text(b) );
-                });
-            }
-            $('#fs-promo-preview').show();
-        }
-
         function esc(str) {
             return $('<div>').text(str).html();
         }

@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,7 +71,7 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 
 == External Services ==
 
-Funnel Mapper connects to two external services, both only from the WordPress admin area. No external connections are made on your public-facing site.
+Funnel Mapper connects to one external service (Google Analytics), only from the WordPress admin area. No external connections are made on your public-facing site.
 
 = Google Analytics Data API =
 
@@ -86,12 +86,6 @@ These requests are made only after you explicitly authorize your Google account 
 * Google Privacy Policy: https://policies.google.com/privacy
 * Google Terms of Service: https://policies.google.com/terms
 
-= MarTech Spark Promo Feed =
-
-Funnel Mapper periodically fetches a small JSON file from `https://martechspark.com/funnelspark-promo.json` to display promotional content in the plugin editor sidebar. This request is made only on admin pages and is cached for 1 hour. The request includes the plugin version and your site URL in the HTTP user-agent string (`FunnelMapper/x.x.x`). No personal data or analytics data is transmitted.
-
-* MarTech Spark Privacy Policy: https://martechspark.com/privacy-policy/
-
 == Screenshots ==
 
 1. Funnel Mapper canvas — drag-and-drop funnel builder with live GA4 data badges
@@ -100,6 +94,10 @@ Funnel Mapper periodically fetches a small JSON file from `https://martechspark.
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.3.3 =
+* Update: removed the remote promo feed — the editor sidebar promo is now static content bundled with the plugin, and the plugin no longer makes any requests to martechspark.com
+* Update: removed the now-unused promo refresh AJAX endpoint and JS
 
 = 1.3.2 =
 * Branding: replaced remaining user-facing "FunnelSpark" text with "Funnel Mapper" (editor wordmark, JS messages, readme)
