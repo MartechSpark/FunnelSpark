@@ -28,7 +28,7 @@ wp_print_styles();
         <input type="text" id="fs-funnel-title" class="fs-title-input" value="<?php echo esc_attr( $funnel_title ); ?>" placeholder="Funnel Name">
     </div>
     <div class="fs-editor-topbar__center">
-        <span class="fs-spark-wordmark">⚡ FunnelSpark</span>
+        <span class="fs-spark-wordmark">⚡ Funnel Mapper</span>
     </div>
     <div class="fs-editor-topbar__right">
         <select id="fs-date-range" class="fs-select fs-select--sm">

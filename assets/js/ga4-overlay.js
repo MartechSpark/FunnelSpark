@@ -1,6 +1,6 @@
 /* global FunnelSparkData, FunnelSparkCanvas */
 /**
- * FunnelSpark GA4 Overlay
+ * Funnel Mapper GA4 Overlay
  * Fetches live GA4 metrics per page path and injects data badges
  * onto matching funnel step nodes on the canvas.
  */
@@ -45,7 +45,7 @@
 
     function loadGA4Data( silent ) {
         if ( ! window.FunnelSparkData?.ga4_configured ) {
-            if ( !silent ) alert('Please configure GA4 in FunnelSpark → Settings first.');
+            if ( !silent ) alert('Please configure GA4 in Funnel Mapper → Settings first.');
             return;
         }
 

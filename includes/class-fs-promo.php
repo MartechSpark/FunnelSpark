@@ -20,18 +20,14 @@ class FunnelSpark_Promo {
 
     // ── Fallback defaults (shown if remote fetch fails) ────────────────
     const DEFAULTS = [
-        'badge'           => 'From the Maker of FunnelSpark',
+        'badge'           => 'From Martech Spark',
         'icon'            => '⚡',
-        'headline'        => 'Is Your Funnel Leaking Leads?',
-        'body'            => 'Get a personal video audit of your website — 7 specific things costing you leads, fixed in plain English.',
-        'bullets'         => [
-            '✓ Delivered in 48 hours',
-            '✓ Specific, actionable fixes',
-            '✓ No fluff. No upsell pressure.',
-        ],
-        'cta_text'        => 'Get the $27 Audit →',
-        'cta_url'         => 'https://martechspark.com/lp/homepage-audit/',
-        'powered_by_text' => 'Powered by MarTech Spark',
+        'headline'        => 'Need Help With Your Analytics?',
+        'body'            => 'If you need help with your analytics or conversion rates, reach out to Martech Spark.',
+        'bullets'         => [],
+        'cta_text'        => 'Schedule a Consultation',
+        'cta_url'         => 'https://www.martechspark.com/',
+        'powered_by_text' => 'Powered by Martech Spark',
         'powered_by_url'  => 'https://martechspark.com',
     ];
 
@@ -66,7 +62,7 @@ class FunnelSpark_Promo {
     public static function fetch_and_cache() {
         $response = wp_remote_get( self::REMOTE_URL, [
             'timeout'    => 8,
-            'user-agent' => 'FunnelSpark/' . FUNNELSPARK_VERSION . '; ' . get_bloginfo('url'),
+            'user-agent' => 'FunnelMapper/' . FUNNELSPARK_VERSION . '; ' . get_bloginfo('url'),
         ]);
 
         if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {

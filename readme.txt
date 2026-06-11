@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,8 +38,8 @@ This plugin is built and maintained by [MarTech Spark](https://martechspark.com)
 
 1. Upload the `funnelspark` folder to `/wp-content/plugins/`
 2. Activate the plugin through the **Plugins** menu in WordPress
-3. Go to **FunnelSpark → Settings** and follow the GA4 setup guide
-4. Go to **FunnelSpark → New Funnel** to start building
+3. Go to **Funnel Mapper → Settings** and follow the GA4 setup guide
+4. Go to **Funnel Mapper → New Funnel** to start building
 
 = GA4 Setup (5 minutes) =
 
@@ -47,8 +47,8 @@ This plugin is built and maintained by [MarTech Spark](https://martechspark.com)
 2. Enable the **Google Analytics Data API**
 3. Go to **APIs & Services → OAuth consent screen** and configure it
 4. Go to **Credentials → Create Credentials → OAuth 2.0 Client ID** (type: Web application)
-5. Add the redirect URI shown in FunnelSpark → Settings under Authorized redirect URIs
-6. Copy the **Client ID** and **Client Secret** into FunnelSpark → Settings and save
+5. Add the redirect URI shown in Funnel Mapper → Settings under Authorized redirect URIs
+6. Copy the **Client ID** and **Client Secret** into Funnel Mapper → Settings and save
 7. Click **Connect Google Analytics** and authorize with your Google account
 8. Copy your **GA4 Property ID** from GA4 → Admin → Property Settings
 
@@ -71,35 +71,39 @@ Yes. Map your WooCommerce pages (shop, product, cart, checkout, thank you) as fu
 
 == External Services ==
 
-FunnelSpark connects to two external services, both only from the WordPress admin area. No external connections are made on your public-facing site.
+Funnel Mapper connects to two external services, both only from the WordPress admin area. No external connections are made on your public-facing site.
 
 = Google Analytics Data API =
 
-When you connect a GA4 property, FunnelSpark communicates with the following Google endpoints:
+When you connect a GA4 property, Funnel Mapper communicates with the following Google endpoints:
 
 * `https://accounts.google.com` — OAuth 2.0 authorization
 * `https://oauth2.googleapis.com` — token exchange and refresh
 * `https://analyticsdata.googleapis.com` — fetching GA4 report data
 
-These requests are made only after you explicitly authorize your Google account through the OAuth flow in FunnelSpark → Settings. No GA4 data is transmitted to MarTech Spark or any third party — data flows directly from Google to your WordPress site.
+These requests are made only after you explicitly authorize your Google account through the OAuth flow in Funnel Mapper → Settings. No GA4 data is transmitted to MarTech Spark or any third party — data flows directly from Google to your WordPress site.
 
 * Google Privacy Policy: https://policies.google.com/privacy
 * Google Terms of Service: https://policies.google.com/terms
 
 = MarTech Spark Promo Feed =
 
-FunnelSpark periodically fetches a small JSON file from `https://martechspark.com/funnelspark-promo.json` to display promotional content in the plugin editor sidebar. This request is made only on admin pages and is cached for 1 hour. The request includes the plugin version and your site URL in the HTTP user-agent string (`FunnelSpark/x.x.x`). No personal data or analytics data is transmitted.
+Funnel Mapper periodically fetches a small JSON file from `https://martechspark.com/funnelspark-promo.json` to display promotional content in the plugin editor sidebar. This request is made only on admin pages and is cached for 1 hour. The request includes the plugin version and your site URL in the HTTP user-agent string (`FunnelMapper/x.x.x`). No personal data or analytics data is transmitted.
 
 * MarTech Spark Privacy Policy: https://martechspark.com/privacy-policy/
 
 == Screenshots ==
 
-1. FunnelSpark canvas — drag-and-drop funnel builder with live GA4 data badges
+1. Funnel Mapper canvas — drag-and-drop funnel builder with live GA4 data badges
 2. Dashboard — manage all your funnels in one place
 3. Settings — connect your GA4 property in minutes
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.3.2 =
+* Branding: replaced remaining user-facing "FunnelSpark" text with "Funnel Mapper" (editor wordmark, JS messages, readme)
+* Update: promo sidebar now shows a generic consultation offer ("Schedule a Consultation" -> martechspark.com) instead of the audit promo
 
 = 1.3.1 =
 * Fix: editor and settings pages loaded without styles/scripts — admin asset hook names are now taken from the add_menu_page()/add_submenu_page() return values instead of hardcoded strings, which broke when the menu title changed to "Funnel Mapper"

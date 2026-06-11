@@ -1,6 +1,6 @@
 /* global FunnelSparkData */
 /**
- * FunnelSpark Canvas Engine
+ * Funnel Mapper Canvas Engine
  * DOM-based drag-drop funnel builder with SVG arrow connections.
  * No external dependencies — vanilla JS only.
  */
@@ -80,7 +80,7 @@
             }
             updateEmptyHint();
         } catch(e) {
-            console.warn( 'FunnelSpark: Could not parse canvas data.', e );
+            console.warn( 'Funnel Mapper: Could not parse canvas data.', e );
         }
     }
 
