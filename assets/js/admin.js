@@ -1,4 +1,4 @@
-/* global FS */
+/* global FunnelSparkData */
 (function($) {
     'use strict';
 
@@ -11,7 +11,7 @@
             const card = $(this).closest('.fs-funnel-card');
             if (!confirm('Delete this funnel? This cannot be undone.')) return;
 
-            $.post(FS.ajax_url, { action: 'fs_delete_funnel', nonce: FS.nonce, funnel_id: id })
+            $.post(FunnelSparkData.ajax_url, { action: 'funnelspark_delete_funnel', nonce: FunnelSparkData.nonce, funnel_id: id })
             .done(resp => {
                 if (resp.success) card.fadeOut(300, function() { $(this).remove(); checkEmpty(); });
             });
@@ -23,10 +23,10 @@
             const btn = $(this);
             btn.text('Copying…').prop('disabled', true);
 
-            $.post(FS.ajax_url, { action: 'fs_duplicate_funnel', nonce: FS.nonce, funnel_id: id })
+            $.post(FunnelSparkData.ajax_url, { action: 'funnelspark_duplicate_funnel', nonce: FunnelSparkData.nonce, funnel_id: id })
             .done(resp => {
                 if (resp.success) {
-                    window.location.href = FS.editor_url + '&funnel_id=' + resp.data.funnel_id;
+                    window.location.href = FunnelSparkData.editor_url + '&funnel_id=' + resp.data.funnel_id;
                 }
             })
             .fail(() => { btn.text('Copy').prop('disabled', false); });
@@ -46,9 +46,9 @@
             $spin.show();
             $notice.html('');
 
-            $.post(FS.ajax_url, {
-                action:            'fs_save_settings',
-                nonce:             FS.nonce,
+            $.post(FunnelSparkData.ajax_url, {
+                action:            'funnelspark_save_settings',
+                nonce:             FunnelSparkData.nonce,
                 ga4_property_id:   $('#ga4_property_id').val(),
                 ga4_client_id:     $('#ga4_client_id').val(),
                 ga4_client_secret: $('#ga4_client_secret').val(),
@@ -80,9 +80,9 @@
             $spin.show();
             $saved.hide();
 
-            $.post(FS.ajax_url, {
-                action:             'fs_save_data_settings',
-                nonce:              FS.nonce,
+            $.post(FunnelSparkData.ajax_url, {
+                action:             'funnelspark_save_data_settings',
+                nonce:              FunnelSparkData.nonce,
                 delete_on_uninstall: $('#delete_on_uninstall').is(':checked') ? '1' : '0',
             })
             .done(resp => {
@@ -96,7 +96,7 @@
 
         // ── GA4 Property Info (Settings page) ────────────────────────
         if ( $('#fs-property-loading').length ) {
-            $.post(FS.ajax_url, { action: 'fs_get_ga4_property_info', nonce: FS.nonce })
+            $.post(FunnelSparkData.ajax_url, { action: 'funnelspark_get_ga4_property_info', nonce: FunnelSparkData.nonce })
             .done(function(resp) {
                 $('#fs-property-loading').hide();
                 if ( resp.success ) {
@@ -144,7 +144,7 @@
 
             $btn.prop('disabled', true).text('Disconnecting…');
 
-            $.post(FS.ajax_url, { action: 'fs_disconnect_ga4', nonce: FS.nonce })
+            $.post(FunnelSparkData.ajax_url, { action: 'funnelspark_disconnect_ga4', nonce: FunnelSparkData.nonce })
             .done(resp => {
                 if (resp.success) {
                     location.reload();
@@ -167,9 +167,9 @@
             $btn.text('Fetching…').prop('disabled', true);
             $notice.html('');
 
-            $.post(FS.ajax_url, {
-                action: 'fs_refresh_promo',
-                nonce:  FS.nonce,
+            $.post(FunnelSparkData.ajax_url, {
+                action: 'funnelspark_refresh_promo',
+                nonce:  FunnelSparkData.nonce,
             })
             .done(function(resp) {
                 if ( resp.success ) {

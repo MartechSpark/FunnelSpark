@@ -1,30 +1,37 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-class FS_Ajax {
+class FunnelSpark_Ajax {
 
     public function init() {
-        add_action( 'wp_ajax_fs_save_funnel',       [ $this, 'save_funnel' ] );
-        add_action( 'wp_ajax_fs_get_ga4_overlay',   [ $this, 'get_ga4_overlay' ] );
-        add_action( 'wp_ajax_fs_dismiss_promo',     [ $this, 'dismiss_promo' ] );
-        add_action( 'wp_ajax_fs_save_settings',     [ $this, 'save_settings' ] );
-        add_action( 'wp_ajax_fs_disconnect_ga4',      [ $this, 'disconnect_ga4' ] );
-        add_action( 'wp_ajax_fs_save_data_settings', [ $this, 'save_data_settings' ] );
-        add_action( 'wp_ajax_fs_get_ga4_sources',    [ $this, 'get_ga4_sources' ] );
-        add_action( 'wp_ajax_fs_delete_funnel',     [ $this, 'delete_funnel' ] );
-        add_action( 'wp_ajax_fs_duplicate_funnel',  [ $this, 'duplicate_funnel' ] );
-        add_action( 'wp_ajax_fs_refresh_promo',        [ $this, 'refresh_promo' ] );
-        add_action( 'wp_ajax_fs_get_ga4_property_info', [ $this, 'get_ga4_property_info' ] );
+        add_action( 'wp_ajax_funnelspark_save_funnel',       [ $this, 'save_funnel' ] );
+        add_action( 'wp_ajax_funnelspark_get_ga4_overlay',   [ $this, 'get_ga4_overlay' ] );
+        add_action( 'wp_ajax_funnelspark_dismiss_promo',     [ $this, 'dismiss_promo' ] );
+        add_action( 'wp_ajax_funnelspark_save_settings',     [ $this, 'save_settings' ] );
+        add_action( 'wp_ajax_funnelspark_disconnect_ga4',      [ $this, 'disconnect_ga4' ] );
+        add_action( 'wp_ajax_funnelspark_save_data_settings', [ $this, 'save_data_settings' ] );
+        add_action( 'wp_ajax_funnelspark_get_ga4_sources',    [ $this, 'get_ga4_sources' ] );
+        add_action( 'wp_ajax_funnelspark_delete_funnel',     [ $this, 'delete_funnel' ] );
+        add_action( 'wp_ajax_funnelspark_duplicate_funnel',  [ $this, 'duplicate_funnel' ] );
+        add_action( 'wp_ajax_funnelspark_refresh_promo',        [ $this, 'refresh_promo' ] );
+        add_action( 'wp_ajax_funnelspark_get_ga4_property_info', [ $this, 'get_ga4_property_info' ] );
     }
 
     // ── Save Funnel Canvas ─────────────────────────────────────────────
     public function save_funnel() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) wp_send_json_error( 'Unauthorized' );
 
-        $funnel_id = (int) ( $_POST['funnel_id'] ?? 0 );
-        $title     = sanitize_text_field( $_POST['title'] ?? 'Untitled Funnel' );
+        $funnel_id = absint( $_POST['funnel_id'] ?? 0 );
+        $title     = sanitize_text_field( wp_unslash( $_POST['title'] ?? 'Untitled Funnel' ) );
         $canvas    = sanitize_text_field( wp_unslash( $_POST['canvas_data'] ?? '' ) );
+
+        if ( $funnel_id ) {
+            $existing = get_post( $funnel_id );
+            if ( ! $existing || $existing->post_type !== 'funnelspark_funnel' || ! current_user_can( 'edit_post', $funnel_id ) ) {
+                wp_send_json_error( 'Unauthorized' );
+            }
+        }
 
         // Validate JSON structure
         $decoded = json_decode( $canvas, true );
@@ -32,8 +39,11 @@ class FS_Ajax {
             wp_send_json_error( 'Invalid canvas data.' );
         }
 
-        // Allow only known top-level keys
-        $decoded = array_intersect_key( $decoded, array_flip( [ 'nodes', 'connections' ] ) );
+        // Allow only known top-level keys; nodes/connections must be lists of arrays
+        $decoded = [
+            'nodes'       => is_array( $decoded['nodes'] ?? null )       ? array_values( array_filter( $decoded['nodes'], 'is_array' ) )       : [],
+            'connections' => is_array( $decoded['connections'] ?? null ) ? array_values( array_filter( $decoded['connections'], 'is_array' ) ) : [],
+        ];
 
         // Sanitize each node's data
         if ( ! empty( $decoded['nodes'] ) ) {
@@ -65,7 +75,7 @@ class FS_Ajax {
             wp_update_post( [ 'ID' => $funnel_id, 'post_title' => $title ] );
         } else {
             $funnel_id = wp_insert_post([
-                'post_type'   => 'fs_funnel',
+                'post_type'   => 'funnelspark_funnel',
                 'post_title'  => $title,
                 'post_status' => 'publish',
             ]);
@@ -75,24 +85,24 @@ class FS_Ajax {
             wp_send_json_error( 'Could not save funnel.' );
         }
 
-        update_post_meta( $funnel_id, '_fs_canvas', wp_json_encode( $decoded ) );
-        update_post_meta( $funnel_id, '_fs_updated', current_time( 'mysql' ) );
+        update_post_meta( $funnel_id, '_funnelspark_canvas', wp_json_encode( $decoded ) );
+        update_post_meta( $funnel_id, '_funnelspark_updated', current_time( 'mysql' ) );
 
         wp_send_json_success( [ 'funnel_id' => $funnel_id, 'title' => $title ] );
     }
 
     // ── GA4 Overlay ───────────────────────────────────────────────────
     public function get_ga4_overlay() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) wp_send_json_error( 'Unauthorized' );
-        if ( ! FS_Settings::is_ga4_configured() ) wp_send_json_error( 'GA4 not configured.' );
+        if ( ! FunnelSpark_Settings::is_ga4_configured() ) wp_send_json_error( 'GA4 not configured.' );
 
-        $paths      = array_map( 'sanitize_text_field', (array) ( $_POST['paths'] ?? [] ) );
-        $date_range = sanitize_text_field( $_POST['date_range'] ?? '30daysAgo' );
+        $paths      = array_map( 'sanitize_text_field', wp_unslash( (array) ( $_POST['paths'] ?? [] ) ) );
+        $date_range = sanitize_text_field( wp_unslash( $_POST['date_range'] ?? '30daysAgo' ) );
 
         if ( empty( $paths ) ) wp_send_json_error( 'No page paths provided.' );
 
-        $client  = new FS_GA4_Client();
+        $client  = new FunnelSpark_GA4_Client();
         $raw     = $client->get_page_metrics( $paths, $date_range );
 
         if ( is_wp_error( $raw ) ) {
@@ -104,38 +114,39 @@ class FS_Ajax {
 
     // ── Dismiss Promo ─────────────────────────────────────────────────
     public function dismiss_promo() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
-        update_user_meta( get_current_user_id(), 'fs_promo_dismissed', 1 );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
+        if ( ! current_user_can( 'edit_posts' ) ) wp_send_json_error( 'Unauthorized' );
+        update_user_meta( get_current_user_id(), 'funnelspark_promo_dismissed', 1 );
         wp_send_json_success();
     }
 
     // ── Save Settings ─────────────────────────────────────────────────
     public function save_settings() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
-        $property_id   = sanitize_text_field( $_POST['ga4_property_id'] ?? '' );
-        $client_id     = sanitize_text_field( $_POST['ga4_client_id'] ?? '' );
-        $client_secret = sanitize_text_field( $_POST['ga4_client_secret'] ?? '' );
+        $property_id   = sanitize_text_field( wp_unslash( $_POST['ga4_property_id'] ?? '' ) );
+        $client_id     = sanitize_text_field( wp_unslash( $_POST['ga4_client_id'] ?? '' ) );
+        $client_secret = sanitize_text_field( wp_unslash( $_POST['ga4_client_secret'] ?? '' ) );
 
-        FS_Settings::set([
+        FunnelSpark_Settings::set([
             'ga4_property_id'   => $property_id,
             'ga4_client_id'     => $client_id,
             'ga4_client_secret' => $client_secret,
         ]);
 
-        delete_transient( 'fs_ga4_token' );
+        delete_transient( 'funnelspark_ga4_token' );
         wp_send_json_success( 'Settings saved.' );
     }
 
     // ── GA4 Traffic Sources ───────────────────────────────────────────
     public function get_ga4_sources() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) wp_send_json_error( 'Unauthorized' );
-        if ( ! FS_Settings::is_ga4_configured() )  wp_send_json_error( 'GA4 not configured.' );
+        if ( ! FunnelSpark_Settings::is_ga4_configured() )  wp_send_json_error( 'GA4 not configured.' );
 
-        $date_range = sanitize_text_field( $_POST['date_range'] ?? '30daysAgo' );
-        $client     = new FS_GA4_Client();
+        $date_range = sanitize_text_field( wp_unslash( $_POST['date_range'] ?? '30daysAgo' ) );
+        $client     = new FunnelSpark_GA4_Client();
         $raw        = $client->get_traffic_sources( $date_range );
 
         if ( is_wp_error( $raw ) ) {
@@ -147,11 +158,11 @@ class FS_Ajax {
 
     // ── Data & Privacy Setting ────────────────────────────────────────
     public function save_data_settings() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
-        FS_Settings::set( [
-            'delete_on_uninstall' => sanitize_text_field( $_POST['delete_on_uninstall'] ?? '0' ),
+        FunnelSpark_Settings::set( [
+            'delete_on_uninstall' => sanitize_text_field( wp_unslash( $_POST['delete_on_uninstall'] ?? '0' ) ),
         ] );
 
         wp_send_json_success();
@@ -159,27 +170,28 @@ class FS_Ajax {
 
     // ── Disconnect GA4 ────────────────────────────────────────────────
     public function disconnect_ga4() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
-        $refresh_token = FS_Settings::get( 'ga4_refresh_token' );
+        $refresh_token = FunnelSpark_Settings::get( 'ga4_refresh_token' );
         if ( $refresh_token ) {
-            FS_GA4_Client::revoke( $refresh_token );
+            FunnelSpark_GA4_Client::revoke( $refresh_token );
         }
 
-        FS_Settings::set( [ 'ga4_refresh_token' => '' ] );
-        delete_transient( 'fs_ga4_token' );
-        delete_transient( 'fs_ga4_property_info' );
+        FunnelSpark_Settings::set( [ 'ga4_refresh_token' => '' ] );
+        delete_transient( 'funnelspark_ga4_token' );
+        delete_transient( 'funnelspark_ga4_property_info' );
         wp_send_json_success( 'Disconnected.' );
     }
 
     // ── Delete Funnel ─────────────────────────────────────────────────
     public function delete_funnel() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
-        if ( ! current_user_can( 'delete_posts' ) ) wp_send_json_error( 'Unauthorized' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
+        $funnel_id = absint( $_POST['funnel_id'] ?? 0 );
+        $funnel    = $funnel_id ? get_post( $funnel_id ) : null;
 
-        $funnel_id = (int) ( $_POST['funnel_id'] ?? 0 );
-        if ( ! $funnel_id ) wp_send_json_error( 'Invalid funnel.' );
+        if ( ! $funnel || $funnel->post_type !== 'funnelspark_funnel' ) wp_send_json_error( 'Invalid funnel.' );
+        if ( ! current_user_can( 'delete_post', $funnel_id ) ) wp_send_json_error( 'Unauthorized' );
 
         wp_delete_post( $funnel_id, true );
         wp_send_json_success();
@@ -187,39 +199,39 @@ class FS_Ajax {
 
     // ── Duplicate Funnel ──────────────────────────────────────────────
     public function duplicate_funnel() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) wp_send_json_error( 'Unauthorized' );
 
-        $funnel_id = (int) ( $_POST['funnel_id'] ?? 0 );
-        $original  = get_post( $funnel_id );
-        if ( ! $original ) wp_send_json_error( 'Funnel not found.' );
+        $funnel_id = absint( $_POST['funnel_id'] ?? 0 );
+        $original  = $funnel_id ? get_post( $funnel_id ) : null;
+        if ( ! $original || $original->post_type !== 'funnelspark_funnel' ) wp_send_json_error( 'Funnel not found.' );
 
         $new_id = wp_insert_post([
-            'post_type'   => 'fs_funnel',
+            'post_type'   => 'funnelspark_funnel',
             'post_title'  => $original->post_title . ' (Copy)',
             'post_status' => 'publish',
         ]);
 
-        $canvas = get_post_meta( $funnel_id, '_fs_canvas', true );
-        update_post_meta( $new_id, '_fs_canvas', $canvas );
-        update_post_meta( $new_id, '_fs_updated', current_time( 'mysql' ) );
+        $canvas = get_post_meta( $funnel_id, '_funnelspark_canvas', true );
+        update_post_meta( $new_id, '_funnelspark_canvas', $canvas );
+        update_post_meta( $new_id, '_funnelspark_updated', current_time( 'mysql' ) );
 
         wp_send_json_success( [ 'funnel_id' => $new_id ] );
     }
 
     // ── GA4 Property & Stream Info ────────────────────────────────────
     public function get_ga4_property_info() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
-        if ( ! FS_Settings::is_ga4_configured() ) wp_send_json_error( 'GA4 not configured.' );
+        if ( ! FunnelSpark_Settings::is_ga4_configured() ) wp_send_json_error( 'GA4 not configured.' );
 
-        $cached = get_transient( 'fs_ga4_property_info' );
+        $cached = get_transient( 'funnelspark_ga4_property_info' );
         if ( $cached !== false ) {
             wp_send_json_success( $cached );
             return;
         }
 
-        $client = new FS_GA4_Client();
+        $client = new FunnelSpark_GA4_Client();
         $info   = $client->get_property_info();
 
         if ( is_wp_error( $info ) ) {
@@ -227,21 +239,21 @@ class FS_Ajax {
             return;
         }
 
-        set_transient( 'fs_ga4_property_info', $info, DAY_IN_SECONDS );
+        set_transient( 'funnelspark_ga4_property_info', $info, DAY_IN_SECONDS );
         wp_send_json_success( $info );
     }
 
     // ── Refresh Remote Promo ──────────────────────────────────────────
     public function refresh_promo() {
-        check_ajax_referer( 'fs_nonce', 'nonce' );
+        check_ajax_referer( 'funnelspark_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
-        FS_Promo::clear_cache();
-        $promo = FS_Promo::fetch_and_cache();
+        FunnelSpark_Promo::clear_cache();
+        $promo = FunnelSpark_Promo::fetch_and_cache();
 
         wp_send_json_success( [
             'promo'  => $promo,
-            'status' => FS_Promo::cache_status(),
+            'status' => FunnelSpark_Promo::cache_status(),
         ]);
     }
 }

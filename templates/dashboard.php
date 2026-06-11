@@ -1,7 +1,7 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit;
 
 $funnels = get_posts([
-    'post_type'      => 'fs_funnel',
+    'post_type'      => 'funnelspark_funnel',
     'posts_per_page' => -1,
     'post_status'    => 'publish',
     'orderby'        => 'modified',
@@ -24,7 +24,7 @@ $funnels = get_posts([
         </div>
     </div>
 
-    <?php if ( ! FS_Settings::is_ga4_configured() ) : ?>
+    <?php if ( ! FunnelSpark_Settings::is_ga4_configured() ) : ?>
     <div class="fs-notice fs-notice--warning">
         ⚠ <strong>Connect GA4</strong> to see live conversion data on your funnels.
         <a href="<?php echo esc_url( admin_url('admin.php?page=funnelspark-settings') ); ?>">Set up GA4 →</a>
@@ -42,8 +42,8 @@ $funnels = get_posts([
 
     <div class="fs-funnel-grid" id="fs-funnel-grid">
         <?php foreach ( $funnels as $funnel ) :
-            $updated  = get_post_meta( $funnel->ID, '_fs_updated', true );
-            $canvas   = json_decode( get_post_meta( $funnel->ID, '_fs_canvas', true ), true );
+            $updated  = get_post_meta( $funnel->ID, '_funnelspark_updated', true );
+            $canvas   = json_decode( get_post_meta( $funnel->ID, '_funnelspark_canvas', true ), true );
             $steps    = count( $canvas['nodes'] ?? [] );
         ?>
         <div class="fs-funnel-card" data-id="<?php echo esc_attr( $funnel->ID ); ?>">

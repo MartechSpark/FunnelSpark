@@ -1,9 +1,9 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit;
 
-$connected    = FS_Settings::is_ga4_configured();
-$has_creds    = ! empty( FS_Settings::get( 'ga4_client_id' ) ) && ! empty( FS_Settings::get( 'ga4_client_secret' ) );
-$redirect_uri = FS_GA4_Client::get_redirect_uri();
-$auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
+$connected    = FunnelSpark_Settings::is_ga4_configured();
+$has_creds    = ! empty( FunnelSpark_Settings::get( 'ga4_client_id' ) ) && ! empty( FunnelSpark_Settings::get( 'ga4_client_secret' ) );
+$redirect_uri = FunnelSpark_GA4_Client::get_redirect_uri();
+$auth_url     = $has_creds ? FunnelSpark_GA4_Client::get_auth_url() : '';
 ?>
 <div class="fs-wrap">
 
@@ -19,15 +19,15 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
 
     <div class="fs-settings-layout">
 
-        <?php if ( isset( $_GET['fs_ga4_status'] ) && $_GET['fs_ga4_status'] === 'connected' ) : ?>
+        <?php if ( sanitize_key( wp_unslash( $_GET['funnelspark_ga4_status'] ?? '' ) ) === 'connected' ) : ?>
             <div class="fs-notice fs-notice--success" style="max-width:680px;margin-bottom:16px;">
                 Google Analytics connected successfully.
             </div>
         <?php endif; ?>
 
-        <?php if ( isset( $_GET['fs_ga4_error'] ) ) : ?>
+        <?php if ( isset( $_GET['funnelspark_ga4_error'] ) ) : ?>
             <div class="fs-notice fs-notice--error" style="max-width:680px;margin-bottom:16px;">
-                Connection failed: <?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['fs_ga4_error'] ) ) ); ?>
+                Connection failed: <?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['funnelspark_ga4_error'] ) ) ); ?>
             </div>
         <?php endif; ?>
 
@@ -37,18 +37,18 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
 
             <div class="fs-field">
                 <label class="fs-label" for="ga4_property_id">GA4 Property ID <span class="fs-required">*</span></label>
-                <input type="text" id="ga4_property_id" class="fs-input" value="<?php echo esc_attr( FS_Settings::get( 'ga4_property_id' ) ); ?>" placeholder="e.g. 123456789">
+                <input type="text" id="ga4_property_id" class="fs-input" value="<?php echo esc_attr( FunnelSpark_Settings::get( 'ga4_property_id' ) ); ?>" placeholder="e.g. 123456789">
                 <p class="fs-hint">GA4 → Admin → Property Settings. Numbers only — not the Measurement ID (G-XXXXXXXX).</p>
             </div>
 
             <div class="fs-field">
                 <label class="fs-label" for="ga4_client_id">OAuth Client ID <span class="fs-required">*</span></label>
-                <input type="text" id="ga4_client_id" class="fs-input" value="<?php echo esc_attr( FS_Settings::get( 'ga4_client_id' ) ); ?>" placeholder="e.g. 123456789-abc123.apps.googleusercontent.com">
+                <input type="text" id="ga4_client_id" class="fs-input" value="<?php echo esc_attr( FunnelSpark_Settings::get( 'ga4_client_id' ) ); ?>" placeholder="e.g. 123456789-abc123.apps.googleusercontent.com">
             </div>
 
             <div class="fs-field">
                 <label class="fs-label" for="ga4_client_secret">OAuth Client Secret <span class="fs-required">*</span></label>
-                <input type="password" id="ga4_client_secret" class="fs-input" value="<?php echo esc_attr( FS_Settings::get( 'ga4_client_secret' ) ); ?>" placeholder="GOCSPX-…" autocomplete="new-password">
+                <input type="password" id="ga4_client_secret" class="fs-input" value="<?php echo esc_attr( FunnelSpark_Settings::get( 'ga4_client_secret' ) ); ?>" placeholder="GOCSPX-…" autocomplete="new-password">
             </div>
 
             <div class="fs-field">
@@ -120,7 +120,7 @@ $auth_url     = $has_creds ? FS_GA4_Client::get_auth_url() : '';
             </p>
             <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
                 <input type="checkbox" id="delete_on_uninstall" style="margin-top:3px;flex-shrink:0;"
-                    <?php checked( FS_Settings::get( 'delete_on_uninstall' ), '1' ); ?> value="1">
+                    <?php checked( FunnelSpark_Settings::get( 'delete_on_uninstall' ), '1' ); ?> value="1">
                 <span>
                     <strong style="color:#f87171;">Delete all data when the plugin is uninstalled</strong><br>
                     <span class="fs-hint">If checked, deleting the plugin from the WordPress admin will permanently remove all funnels, settings, and cached data. This cannot be undone.</span>

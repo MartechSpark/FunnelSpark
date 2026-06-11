@@ -2,19 +2,19 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * FS_Promo
+ * FunnelSpark_Promo
  *
  * Fetches the remote promo JSON from martechspark.com and caches it
- * for 24 hours as a WP transient. Supports instant force-refresh via:
- *   - URL param:  ?fs_promo_refresh=1  (admin only)
- *   - AJAX call:  action=fs_refresh_promo  (Settings page button)
+ * for 24 hours as a WP transient. Supports instant force-refresh via
+ * the nonce-protected AJAX call action=funnelspark_refresh_promo
+ * (Settings page button).
  *
  * Falls back to hardcoded defaults if the remote fetch fails,
  * so the sidebar never shows blank.
  */
-class FS_Promo {
+class FunnelSpark_Promo {
 
-    const TRANSIENT_KEY = 'fs_remote_promo';
+    const TRANSIENT_KEY = 'funnelspark_remote_promo';
     const CACHE_TTL     = HOUR_IN_SECONDS;
     const REMOTE_URL    = 'https://martechspark.com/funnelspark-promo.json';
 
@@ -37,15 +37,6 @@ class FS_Promo {
 
     // ── Get Promo Data ────────────────────────────────────────────────
     public static function get() {
-        // Force-refresh via URL param (admin only, no nonce needed — read-only action)
-        if (
-            is_admin() &&
-            current_user_can( 'manage_options' ) &&
-            ! empty( $_GET['fs_promo_refresh'] )
-        ) {
-            self::clear_cache();
-        }
-
         $cached = get_transient( self::TRANSIENT_KEY );
         if ( $cached !== false ) {
             return self::add_utm( $cached );
@@ -75,7 +66,7 @@ class FS_Promo {
     public static function fetch_and_cache() {
         $response = wp_remote_get( self::REMOTE_URL, [
             'timeout'    => 8,
-            'user-agent' => 'FunnelSpark/' . FS_VERSION . '; ' . get_bloginfo('url'),
+            'user-agent' => 'FunnelSpark/' . FUNNELSPARK_VERSION . '; ' . get_bloginfo('url'),
         ]);
 
         if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {

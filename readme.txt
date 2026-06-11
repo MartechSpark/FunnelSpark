@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2.11
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -100,6 +100,14 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.3.0 =
+* Security/Review: renamed all short "fs_"/"FS" prefixes (classes, constants, AJAX actions, nonce, post type, post/user meta keys, transients, script/style handles, and the localized JS object) to the unique "funnelspark_" prefix per WordPress.org guidelines — includes an automatic one-time data migration for existing installs
+* Security: removed the nonce-less ?fs_promo_refresh URL parameter (promo refresh is now AJAX-only with nonce + capability checks)
+* Security: canvas JSON is now strictly validated — nodes/connections must be lists of arrays; unknown keys and malformed entries are discarded before saving
+* Security: save/delete/duplicate funnel AJAX handlers now verify the post type and per-post capabilities (edit_post / delete_post)
+* Security: added wp_unslash() + sanitization to all remaining $_GET/$_POST inputs (OAuth callback, settings, GA4 requests)
+* Fix: post type labels now use the correct text domain
 
 = 1.2.11 =
 * Rename plugin to MarTech Spark Conversion Funnel Mapper; update slug/text domain
