@@ -3,6 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class FunnelSpark_Admin {
 
+    private $page_hooks   = [];
+    private $editor_hooks = [];
+
     public function init() {
         add_action( 'admin_menu',            [ $this, 'register_menu' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
@@ -14,7 +17,7 @@ class FunnelSpark_Admin {
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FF6E4E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/><path d="M10 6.5h4"/><path d="M17.5 10v4"/><path d="M10 17.5h4"/><path d="M6.5 10v4"/></svg>'
         );
 
-        add_menu_page(
+        $this->page_hooks[] = add_menu_page(
             'Funnel Mapper',
             'Funnel Mapper',
             'edit_posts',
@@ -24,10 +27,15 @@ class FunnelSpark_Admin {
             58
         );
 
-        add_submenu_page( 'funnelspark', 'My Funnels',  'My Funnels',  'edit_posts',      'funnelspark',          [ $this, 'render_dashboard' ] );
-        add_submenu_page( 'funnelspark', 'New Funnel',  'New Funnel',  'edit_posts',      'funnelspark-new',      [ $this, 'render_editor' ] );
-        add_submenu_page( 'funnelspark', 'Edit Funnel', 'Edit Funnel', 'edit_posts',      'funnelspark-editor',   [ $this, 'render_editor' ] );
-        add_submenu_page( 'funnelspark', 'Settings',    'Settings',    'manage_options',  'funnelspark-settings', [ $this, 'render_settings' ] );
+        // Hook suffixes are derived from the menu title by WordPress, so we
+        // capture the return values instead of hardcoding hook names.
+        $this->page_hooks[]   = add_submenu_page( 'funnelspark', 'My Funnels',  'My Funnels',  'edit_posts',      'funnelspark',          [ $this, 'render_dashboard' ] );
+        $this->editor_hooks[] = add_submenu_page( 'funnelspark', 'New Funnel',  'New Funnel',  'edit_posts',      'funnelspark-new',      [ $this, 'render_editor' ] );
+        $this->editor_hooks[] = add_submenu_page( 'funnelspark', 'Edit Funnel', 'Edit Funnel', 'edit_posts',      'funnelspark-editor',   [ $this, 'render_editor' ] );
+        $this->page_hooks[]   = add_submenu_page( 'funnelspark', 'Settings',    'Settings',    'manage_options',  'funnelspark-settings', [ $this, 'render_settings' ] );
+
+        $this->editor_hooks = array_filter( $this->editor_hooks );
+        $this->page_hooks   = array_filter( array_merge( $this->page_hooks, $this->editor_hooks ) );
 
         // funnelspark-editor stays registered (removing it breaks WP capability checks)
         // It is hidden from nav via inline CSS added in enqueue_assets().
@@ -36,13 +44,12 @@ class FunnelSpark_Admin {
     public function enqueue_assets( $hook ) {
         wp_add_inline_style( 'common', '#adminmenu a[href="admin.php?page=funnelspark-editor"]{display:none!important}' );
 
-        $fs_pages = [ 'toplevel_page_funnelspark', 'funnelspark_page_funnelspark-new', 'funnelspark_page_funnelspark-editor', 'funnelspark_page_funnelspark-settings' ];
-        if ( ! in_array( $hook, $fs_pages, true ) ) return;
+        if ( ! in_array( $hook, $this->page_hooks, true ) ) return;
 
         wp_enqueue_style( 'funnelspark-fonts', 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500&display=swap', [], null );
         wp_enqueue_style( 'funnelspark-admin', FUNNELSPARK_PLUGIN_URL . 'assets/css/admin.css', [], FUNNELSPARK_VERSION );
 
-        $is_editor = in_array( $hook, [ 'funnelspark_page_funnelspark-new', 'funnelspark_page_funnelspark-editor' ], true );
+        $is_editor = in_array( $hook, $this->editor_hooks, true );
 
         wp_enqueue_script( 'funnelspark-admin', FUNNELSPARK_PLUGIN_URL . 'assets/js/admin.js', [ 'jquery' ], FUNNELSPARK_VERSION, true );
 

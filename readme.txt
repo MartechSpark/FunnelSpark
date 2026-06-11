@@ -4,7 +4,7 @@ Tags: sales funnel, funnel builder, GA4, conversion tracking, marketing funnel, 
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -100,6 +100,9 @@ FunnelSpark periodically fetches a small JSON file from `https://martechspark.co
 4. Live data overlay — sessions and conversion rates on every funnel step
 
 == Changelog ==
+
+= 1.3.1 =
+* Fix: editor and settings pages loaded without styles/scripts — admin asset hook names are now taken from the add_menu_page()/add_submenu_page() return values instead of hardcoded strings, which broke when the menu title changed to "Funnel Mapper"
 
 = 1.3.0 =
 * Security/Review: renamed all short "fs_"/"FS" prefixes (classes, constants, AJAX actions, nonce, post type, post/user meta keys, transients, script/style handles, and the localized JS object) to the unique "funnelspark_" prefix per WordPress.org guidelines — includes an automatic one-time data migration for existing installs
